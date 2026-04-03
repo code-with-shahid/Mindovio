@@ -101,10 +101,9 @@ npm run dev
 ---
 
 ## 📸 Screenshots
-
-## 📸 Screenshots
-
-![Homepage](./Screenshot(355).png)
+<p align="center">
+  <img src="./Home.png" width="700"/>
+</p>
 
 ---
 
