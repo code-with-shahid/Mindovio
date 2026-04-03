@@ -1,5 +1,7 @@
 # 📚 ExamNotesAI
 
+🚀 **Live Demo:** https://examnotesaiclient-90vb.onrender.com
+
 An AI-powered platform that helps students generate high-quality exam notes instantly from topics or questions. Built to simplify studying and boost productivity using modern AI tools.
 
 ---
