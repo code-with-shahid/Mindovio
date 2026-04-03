@@ -100,6 +100,14 @@ npm run dev
 
 ---
 
+## 📸 Screenshots
+
+## 📸 Screenshots
+
+![Homepage](./Screenshot(355).png)
+
+---
+
 ## 🎯 Use Case
 
 This project is designed for:
