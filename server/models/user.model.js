@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema({
         unique:true,
         required:true
     },
+    firebaseUid:{
+        type:String,
+        unique:true,
+        sparse:true
+    },
     credits:{
         type:Number,
         default:50,
@@ -23,9 +28,7 @@ const userSchema = new mongoose.Schema({
         type:[mongoose.Schema.Types.ObjectId],
         ref:"Notes",
         default:[]
-
     }
-
 },{timestamps:true})
 
 const UserModel = mongoose.model("UserModel" , userSchema)

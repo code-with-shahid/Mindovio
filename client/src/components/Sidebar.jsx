@@ -1,123 +1,66 @@
-import React from 'react'
+import { HiStar, HiQuestionMarkCircle, HiFire } from "react-icons/hi2"
+import Card from "./ui/Card"
+import Badge from "./ui/Badge"
 
-function Sidebar({result}) {
-
-    if(!result ||
+export default function Sidebar({ result }) {
+  if (
+    !result ||
     !result.subTopics ||
     !result.questions ||
     !result.questions.short ||
-    !result.questions.long){
-        return null;
-    }
+    !result.questions.long
+  ) {
+    return null
+  }
+
   return (
-    <div className='bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-6'>
-        <div className='flex items-center gap-2'>
+    <Card glass className="space-y-5 sticky top-24">
+      <div className="flex items-center gap-2">
+        <HiStar className="text-brand-500" />
+        <h3 className="font-semibold text-[var(--color-text-primary)]">Quick Exam View</h3>
+      </div>
 
-            <span className='text-xl'>📌</span>
-            <h3 className='text-lg font-semibold text-indigo-600'>
-                Quick Exam View
-            </h3>
+      {/* Importance */}
+      <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3">
+        <div className="flex items-center gap-2 mb-1">
+          <HiFire className="text-amber-500 text-sm" />
+          <span className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wider">Importance</span>
         </div>
+        <p className="text-lg font-bold text-[var(--color-text-primary)]">{result.importance}</p>
+      </div>
 
-        <section>
-            <p className='text-sm font-semibold text-gray-700 mb-3'>
-                ⭐ Sub Topics (Priority Wise)
-            </p>
-            {
-                Object.entries(result.subTopics).map(([star , topics])=>(
-                    <div key={star} className='mb-3
-              rounded-lg
-              bg-gray-50
-              border border-gray-200
-              p-3'>
+      {/* Sub topics */}
+      <div>
+        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+          Sub Topics
+        </p>
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {Object.entries(result.subTopics).map(([star, topics]) => (
+            <div key={star} className="rounded-lg bg-[var(--color-surface-muted)] p-3">
+              <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mb-1">{star}</p>
+              <ul className="text-xs text-[var(--color-text-secondary)] space-y-0.5">
+                {topics.slice(0, 4).map((t, i) => <li key={i} className="truncate">• {t}</li>)}
+                {topics.length > 4 && (
+                  <li className="text-[var(--color-text-muted)]">+{topics.length - 4} more</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
 
-                <p className='text-sm font-semibold text-yellow-600 mb-1'>
-                    {star} Priority
-                </p>
-                <ul className='list-disc ml-4 text-sm text-gray-700 space-y-1'>
-                    {topics.map((t,i)=>(
-                        <li key={i}>{t}</li>
-                    ))}
-                </ul>
-              </div>
-                ))
-            }
-        </section>
-
-        <section className='rounded-lg
-        bg-yellow-50
-        border border-yellow-200
-        p-3'>
-            <p className='text-sm font-semibold text-gray-700 mb-1'>
-                🔥 Exam Importance
-            </p>
-            <span className='text-yellow-700 font-bold text-sm'>
-                {result.importance}
-            </span>
-       
-
-     
-
-            <p className='text-sm mt-2 font-semibold text-gray-700 mb-3'>
-             ❓ Important Questions
-            </p>
-
-            <div className='mb-4
-          rounded-lg
-          bg-indigo-50
-          border border-indigo-200
-          p-3'>
-            <p className='text-sm font-medium text-indigo-700 mb-2'>
-                   Short Questions
-                </p>
-                <ul className='list-disc ml-4 text-sm text-gray-700 space-y-1'>
-                    {result.questions.short.map((t,i)=>(
-                        <li key={i}>{t}</li>
-                    ))}
-                </ul>
-
-
-          </div>
-
-
-          <div className='mb-4
-          rounded-lg
-          bg-purple-50
-          border border-purple-200
-          p-3'>
-            <p className='text-sm font-medium text-purple-700 mb-2'>
-                   Long Questions
-                </p>
-                <ul className='list-disc ml-4 text-sm text-gray-700 space-y-1'>
-                    {result.questions.long.map((t,i)=>(
-                        <li key={i}>{t}</li>
-                    ))}
-                </ul>
-
-
-          </div>
-
-          <div className='mb-4
-          rounded-lg
-          bg-blue-50
-          border border-blue-200
-          p-3'>
-            <p className='text-sm font-medium text-blue-700 mb-2'>
-                   Diagram Question
-                </p>
-                <ul className='list-disc ml-4 text-sm text-gray-700 space-y-1'>
-                    <li>{result.questions.diagram}</li>
-                    
-                </ul>
-
-
-          </div>
-        </section>
-
-    
-      
-    </div>
+      {/* Questions summary */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <HiQuestionMarkCircle className="text-[var(--color-text-muted)]" />
+          <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">Questions</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge color="brand">{result.questions.short.length} Short</Badge>
+          <Badge color="neutral">{result.questions.long.length} Long</Badge>
+          {result.questions.diagram && <Badge color="success">Diagram Q</Badge>}
+        </div>
+      </div>
+    </Card>
   )
 }
-
-export default Sidebar

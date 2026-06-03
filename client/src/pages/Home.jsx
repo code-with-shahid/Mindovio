@@ -1,141 +1,294 @@
-import React from 'react'
-import Navbar from '../components/Navbar'
+import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
+import { useSelector } from "react-redux"
+import {
+  HiDocumentText,
+  HiChartBar,
+  HiArrowDownTray,
+  HiBolt,
+  HiSparkles,
+  HiCheckCircle,
+  HiQuestionMarkCircle,
+  HiClock,
+  HiShieldCheck,
+} from "react-icons/hi2"
+import LandingNavbar from "../components/landing/LandingNavbar"
+import DemoPreviewSection from "../components/landing/DemoPreviewSection"
+import TestimonialsSection from "../components/landing/TestimonialsSection"
+import FAQSection from "../components/landing/FAQSection"
+import LandingFooter from "../components/landing/LandingFooter"
+import FeatureCard from "../components/ui/FeatureCard"
+import Button from "../components/ui/Button"
+import Badge from "../components/ui/Badge"
 import img from "../assets/img1.png"
-import Footer from '../components/Footer'
-import { useNavigate } from 'react-router-dom'
 
-function Home() {
+/* ─── Data ─── */
+
+const features = [
+  {
+    icon: HiDocumentText,
+    title: "Exam-Focused Notes",
+    description: "Structured, high-yield notes with priority-ranked sub-topics and markdown formatting tailored to your syllabus.",
+  },
+  {
+    icon: HiChartBar,
+    title: "Diagrams & Charts",
+    description: "Auto-generated Mermaid flowcharts and interactive Recharts visualizations for complex concepts.",
+  },
+  {
+    icon: HiBolt,
+    title: "Revision Mode",
+    description: "One-click switch to ultra-concise cheat-sheet format — perfect for last-day exam prep.",
+  },
+  {
+    icon: HiQuestionMarkCircle,
+    title: "Practice Questions",
+    description: "Short, long, and diagram-based questions generated alongside every note set.",
+  },
+  {
+    icon: HiArrowDownTray,
+    title: "PDF Export",
+    description: "Download clean, printable PDFs with notes, revision points, and questions instantly.",
+  },
+  {
+    icon: HiClock,
+    title: "Note History",
+    description: "Every generation is saved. Search, browse, and revisit your notes anytime from the dashboard.",
+  },
+]
+
+const steps = [
+  {
+    step: "01",
+    icon: HiDocumentText,
+    title: "Enter your topic",
+    desc: "Type any subject, class level, and exam type — CBSE, JEE, NEET, GATE, or university semesters.",
+  },
+  {
+    step: "02",
+    icon: HiSparkles,
+    title: "AI generates content",
+    desc: "Google Gemini creates structured notes, diagrams, charts, revision points, and practice questions.",
+  },
+  {
+    step: "03",
+    icon: HiArrowDownTray,
+    title: "Study & export",
+    desc: "Review in the dashboard, toggle revision mode, and download as PDF for offline study.",
+  },
+]
+
+const stats = [
+  { value: "50+", label: "Free credits" },
+  { value: "< 2 min", label: "Avg. generation" },
+  { value: "6+", label: "Output formats" },
+  { value: "100%", label: "Exam-focused" },
+]
+
+const trustBadges = [
+  "Google Gemini AI",
+  "Stripe Payments",
+  "MongoDB Storage",
+  "Secure Google Auth",
+]
+
+/* ─── Page ─── */
+
+export default function Home() {
   const navigate = useNavigate()
+  const { userData } = useSelector((state) => state.user)
+
+  const ctaPath = userData ? "/dashboard" : "/signup"
+  const ctaLabel = userData ? "Open Dashboard" : "Get Started Free"
+
   return (
-    <div className='min-h-screen overflow-hidden bg-white text-black'>
-      <Navbar />
-      {/* top */}
-      <section className='max-w-7xl mx-auto px-8 pt-32 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center'>
-        <div>
-          <motion.div
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
-            whileHover={{ rotateX: 6, rotateY: -6 }}
-            className="transform-gpu"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            <motion.h1 className="text-5xl lg:text-6xl font-extrabold leading-tight
-              bg-gradient-to-br from-black/90 via-black/60 to-black/90
-              bg-clip-text text-transparent"
-              whileHover={{ y: -4 }}
-              style={{
-                transform: "translateZ(40px)",
-                textShadow: "0 18px 40px rgba(0,0,0,0.25)",
-              }}
-            >
-              Create Smart <br /> AI Notes in Seconds
+    <div className="min-h-screen mesh-bg">
+      <LandingNavbar />
 
-
-            </motion.h1>
-
-            <motion.p whileHover={{ y: -2 }}
-              className=' mt-6 max-w-xl text-lg
-              bg-gradient-to-br from-gray-700 via-gray-500/80 to-gray-700
-              bg-clip-text text-transparent'
-              style={{
-                transform: "translateZ(40px)",
-                textShadow: "0 18px 40px rgba(0,0,0,0.25)",
-              }}
-            >
-              Generate exam-focused notes, project documentation,
-              flow diagrams and revision-ready content using AI —
-              faster, cleaner and smarter.
-
-            </motion.p>
-            
-
-          </motion.div>
-
-          <motion.button
-            onClick={()=>navigate("/notes")}
-              whileHover={{
-                scale: 1.07
-              }}
-              whileTap={{ scale: 0.97 }}
-              
-              className='mt-10 px-10 py-3 rounded-xl
-                          flex items-center gap-3
-                          bg-gradient-to-br from-black/90 via-black/80 to-black/90
-                          border border-white/10
-                          text-white font-semibold text-lg
-                          shadow-[0_25px_60px_rgba(0,0,0,0.7)]'>
-              
-              Get Started
-
-
-            </motion.button>
+      {/* ── 1. Hero ── */}
+      <section className="relative pt-28 pb-20 lg:pt-36 lg:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-24 left-[10%] w-80 h-80 bg-brand-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-40 right-[5%] w-96 h-96 bg-violet-500/15 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-brand-500/30 to-transparent" />
         </div>
 
+        <div className="relative max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <Badge color="brand" className="mb-6">
+              <HiSparkles className="text-sm" /> AI Powered Smart Study Assistant
+            </Badge>
 
-        <motion.div 
-         initial={{ opacity: 0, x: 60 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
-          whileHover={{
-            y: -12,
-            rotateX: 8,
-            rotateY: -8,
-            scale: 1.05,
-          }}
-          className="transform-gpu"
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          <div className='overflow-hidden'>
-            <img src={img} alt="img" 
-              style={{ transform: "translateZ(35px)" }} />
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold leading-[1.08] tracking-tight text-[var(--color-text-primary)] mb-6">
+              Turn any topic into{" "}
+              <span className="gradient-text">exam-ready notes</span>{" "}
+              in seconds
+            </h1>
 
+            <p className="text-lg text-[var(--color-text-secondary)] max-w-xl leading-relaxed mb-8">
+              ExamNotesAI generates structured study notes, revision cheat sheets,
+              flow diagrams, and practice questions — so you spend less time
+              organizing and more time learning.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+              <Button size="lg" onClick={() => navigate(ctaPath)} icon={<HiSparkles />}>
+                {ctaLabel}
+              </Button>
+              <Button size="lg" variant="secondary" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}>
+                Watch Demo
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
+              {stats.map(({ value, label }) => (
+                <div key={label}>
+                  <p className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)]">{value}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {trustBadges.map((b) => (
+                <span
+                  key={b}
+                  className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)]/60"
+                >
+                  <HiShieldCheck className="text-emerald-500" />
+                  {b}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="glass-strong rounded-3xl p-2 shadow-2xl shadow-brand-500/10">
+              <img
+                src={img}
+                alt="ExamNotesAI dashboard preview"
+                className="rounded-2xl w-full object-cover aspect-[4/3]"
+              />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7 }}
+              className="absolute -bottom-4 -left-4 glass-strong rounded-2xl px-4 py-3 shadow-xl"
+            >
+              <div className="flex items-center gap-2">
+                <HiCheckCircle className="text-emerald-500 text-xl" />
+                <div>
+                  <p className="text-sm font-medium text-[var(--color-text-primary)]">Notes generated</p>
+                  <p className="text-xs text-[var(--color-text-muted)]">Operating Systems · 10 credits</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9 }}
+              className="absolute -top-3 -right-3 glass-strong rounded-2xl px-4 py-3 shadow-xl hidden sm:block"
+            >
+              <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">50</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Free credits</p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── 2. Features ── */}
+      <section id="features" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader
+            eyebrow="Features"
+            title="Everything you need to ace your exams"
+            subtitle="From detailed study notes to quick revision sheets — intelligently generated for your exam format."
+          />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+              <FeatureCard key={f.title} {...f} delay={i * 0.08} />
+            ))}
           </div>
-
-        </motion.div>
-
+        </div>
       </section>
 
-      {/* bottom */}
-      <section className='max-w-6xl mx-auto px-8 py-32 grid grid-cols-1 md:grid-cols-4 gap-10'>
-        <Feature icon="📘" title="Exam Notes" des="High-yield exam-oriented notes with revision points."/>
-        <Feature icon="📂" title="Project Notes" des="Well-structured content for assignments and projects." />
-        <Feature icon="📊" title="Diagrams" des="Auto-generated visual diagrams for clarity." />
-        <Feature icon="⬇️" title="PDF Download" des="Download clean, printable PDFs instantly." />
+      {/* ── 3. How it works ── */}
+      <section id="how-it-works" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface-elevated)]/50">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader
+            eyebrow="How it works"
+            title="Three steps to better grades"
+            subtitle="No complex setup. Sign in, enter a topic, and let AI do the heavy lifting."
+          />
 
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8 relative">
+            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-brand-500/30 to-transparent" />
+
+            {steps.map(({ step, icon: Icon, title, desc }, i) => (
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="relative glass rounded-2xl p-8 text-center"
+              >
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white mb-5 relative z-10">
+                  <Icon className="text-2xl" />
+                </div>
+                <span className="text-xs font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider">
+                  Step {step}
+                </span>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mt-2 mb-2">{title}</h3>
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
-      <Footer/>
 
+      {/* ── 4. Demo preview ── */}
+      <DemoPreviewSection />
+
+      {/* ── 5. Testimonials ── */}
+      <TestimonialsSection />
+
+      {/* ── 6. FAQ ── */}
+      <FAQSection />
+
+      {/* ── 7. Footer (with CTA) ── */}
+      <LandingFooter />
     </div>
   )
 }
 
-function Feature({icon , title , des}){
-    return(
-        <motion.div 
-        whileHover={{ y: -12, rotateX: 8, rotateY: -8, scale: 1.05 }}
-       transition={{ type: "spring", stiffness: 200, damping: 18 }}
-        className='relative rounded-2xl p-6
-        bg-gradient-to-br from-black/90 via-black/80 to-black/90
-        backdrop-blur-2xl
-        border border-white/10
-        shadow-[0_30px_80px_rgba(0,0,0,0.7)]
-        text-white'
-         style={{ transformStyle: "preserve-3d" }}
-        >
-         
-            <div className='relative z-10' style={{ transform: "translateZ(30px)" }}>
-                 <div className="text-4xl mb-3">{icon}</div>
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-gray-300 text-sm leading-relaxed">{des}</p>
-
-            </div>
-          
-
-
-        </motion.div>
-    )
+function SectionHeader({ eyebrow, title, subtitle }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-center mb-14"
+    >
+      <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider mb-3">
+        {eyebrow}
+      </p>
+      <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-4">{title}</h2>
+      {subtitle && (
+        <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto">{subtitle}</p>
+      )}
+    </motion.div>
+  )
 }
-
-export default Home

@@ -1,37 +1,41 @@
-import React, { useEffect } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
-import Auth from './pages/Auth'
-import { getCurrentUser } from './services/api'
-import { useDispatch, useSelector } from 'react-redux'
-import History from './pages/History'
-import Notes from './pages/Notes'
-import Pricing from './pages/Pricing'
-import PaymentSuccess from './pages/PaymentSuccess'
-import PaymentFailed from './pages/PaymentFailed'
-export const serverUrl = "http://localhost:8000"
+import { Navigate, Route, Routes } from "react-router-dom"
+import Home from "./pages/Home"
+import Login from "./pages/Login"
+import Signup from "./pages/Signup"
+import History from "./pages/History"
+import Notes from "./pages/Notes"
+import Pricing from "./pages/Pricing"
+import PaymentSuccess from "./pages/PaymentSuccess"
+import PaymentFailed from "./pages/PaymentFailed"
+import ProtectedRoute, { GuestRoute } from "./components/layout/ProtectedRoute"
+import { useAuth } from "./context/AuthContext"
+import { PageLoader } from "./components/ui/Spinner"
 
 function App() {
-  const dispatch = useDispatch()
-  useEffect(()=>{
-   getCurrentUser(dispatch)
-  },[dispatch])
+  const { initializing } = useAuth()
 
-  const {userData} = useSelector((state)=>state.user)
+  if (initializing) return <PageLoader />
+
   return (
-    <>
     <Routes>
-      <Route path='/' element={userData? <Home/> : <Navigate to="/auth" replace/>}/>
-      <Route path='/auth' element={userData ? <Navigate to="/" replace/> : <Auth/>}/>
-      <Route path='/history' element={userData? <History/> : <Navigate to="/auth" replace/>}/>
-      <Route path='/notes' element={userData? <Notes/> : <Navigate to="/auth" replace/>}/>
-      <Route path='/pricing' element={userData? <Pricing/> : <Navigate to="/auth" replace/>}/>
+      {/* Public */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+      <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
 
-      <Route path='/payment-success' element={<PaymentSuccess/>}/>
-      <Route path='/payment-failed' element={<PaymentFailed/>}/>
+      {/* Legacy redirect */}
+      <Route path="/auth" element={<Navigate to="/login" replace />} />
+
+      {/* Protected dashboard routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+      <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+
+      {/* Payment callbacks */}
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/payment-failed" element={<PaymentFailed />} />
     </Routes>
-     
-    </>
   )
 }
 
