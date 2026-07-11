@@ -13,7 +13,7 @@ export function PageLoader() {
   return (
     <div className="min-h-screen mesh-bg flex flex-col items-center justify-center gap-4">
       <Spinner size="lg" />
-      <p className="text-sm text-[var(--color-text-secondary)]">Loading ExamNotes AI…</p>
+      <p className="text-sm text-[var(--color-text-secondary)]">Loading ExamNotesAI…</p>
     </div>
   )
 }

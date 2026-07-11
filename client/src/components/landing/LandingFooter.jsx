@@ -2,8 +2,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import { useSelector } from "react-redux"
 import { HiSparkles } from "react-icons/hi2"
-import logo from "../../assets/logo.png"
+import BrandLogo from "../ui/BrandLogo"
 import Button from "../ui/Button"
+import { BRAND_NAME } from "../../constants/brand"
 
 const footerLinks = {
   product: [
@@ -29,7 +30,6 @@ export default function LandingFooter() {
 
   return (
     <footer className="border-t border-[var(--color-border)]">
-      {/* CTA band */}
       <div className="px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -37,14 +37,14 @@ export default function LandingFooter() {
           viewport={{ once: true }}
           className="max-w-4xl mx-auto text-center glass-strong rounded-3xl p-10 lg:p-14 relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-600/10 via-transparent to-violet-600/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-600/10 via-transparent to-brand-400/5 pointer-events-none" />
           <div className="relative">
             <HiSparkles className="text-4xl text-brand-600 dark:text-brand-400 mx-auto mb-5" />
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-primary)] mb-3">
               Start studying smarter today
             </h2>
             <p className="text-[var(--color-text-secondary)] mb-8 max-w-md mx-auto">
-              Join students using ExamNotesAI to prepare faster. 50 free credits — no card required.
+              Join students using {BRAND_NAME} to prepare faster. 50 free credits — no card required.
             </p>
             <Button
               size="lg"
@@ -57,21 +57,10 @@ export default function LandingFooter() {
         </motion.div>
       </div>
 
-      {/* Links */}
       <div className="bg-[var(--color-surface-elevated)] px-4 sm:px-6 lg:px-8 py-14">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="sm:col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <img src={logo} alt="ExamNotesAI" className="h-9 w-9 rounded-lg" />
-              <div>
-                <span className="text-lg font-bold text-[var(--color-text-primary)] block">
-                  ExamNotes<span className="text-brand-600 dark:text-brand-400">AI</span>
-                </span>
-                <span className="text-xs text-[var(--color-text-muted)]">
-                  AI Powered Smart Study Assistant
-                </span>
-              </div>
-            </Link>
+            <BrandLogo showTagline className="mb-4" />
             <p className="text-sm text-[var(--color-text-secondary)] max-w-sm leading-relaxed">
               Generate exam-focused notes, revision sheets, diagrams, and practice questions
               powered by Google Gemini — built for Indian students.
@@ -119,7 +108,7 @@ export default function LandingFooter() {
 
         <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[var(--color-text-muted)]">
-            © {new Date().getFullYear()} ExamNotesAI. All rights reserved.
+            © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
           </p>
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />

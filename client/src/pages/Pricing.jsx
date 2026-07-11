@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react"
 import axios from "axios"
 import { HiCheck, HiSparkles } from "react-icons/hi2"
 import DashboardLayout from "../components/layout/DashboardLayout"
@@ -8,6 +8,8 @@ import { DashboardTopbar } from "../components/layout/Navbar"
 import Card from "../components/ui/Card"
 import Badge from "../components/ui/Badge"
 import Button from "../components/ui/Button"
+import Alert from "../components/ui/Alert"
+import { useToast } from "../context/ToastContext"
 import { serverUrl } from "../config"
 
 const plans = [
@@ -40,20 +42,35 @@ const plans = [
 
 export default function Pricing() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [selectedPrice, setSelectedPrice] = useState(200)
   const [paying, setPaying] = useState(false)
   const [payingAmount, setPayingAmount] = useState(null)
+  const [error, setError] = useState("")
 
   const handlePay = async (amount) => {
     try {
+      setError("")
       setPayingAmount(amount)
       setPaying(true)
       const result = await axios.post(serverUrl + "/api/credit/order", { amount }, { withCredentials: true })
-      if (result.data.url) window.location.href = result.data.url
-    } catch (error) {
-      console.error(error)
+      if (result.data.url) {
+        window.location.href = result.data.url
+        return
+      }
+      setError("Payment link was not returned. Please try again.")
+      toast("Couldn’t start checkout", "error")
+    } catch (err) {
+      console.error(err)
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Payment failed to start. Please try again."
+      setError(message)
+      toast(message, "error")
     } finally {
       setPaying(false)
+      setPayingAmount(null)
     }
   }
 
@@ -73,6 +90,16 @@ export default function Pricing() {
           Each note generation costs 10 credits. Choose the plan that matches your study schedule.
         </p>
       </motion.div>
+
+      <AnimatePresence>
+        {error && (
+          <div className="max-w-5xl mx-auto mb-6">
+            <Alert variant="error" onDismiss={() => setError("")}>
+              {error}
+            </Alert>
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {plans.map((plan, i) => (

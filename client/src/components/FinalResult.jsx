@@ -1,11 +1,12 @@
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"
-import { HiArrowDownTray, HiBolt } from "react-icons/hi2"
+import { HiArrowDownTray, HiBolt, HiExclamationTriangle } from "react-icons/hi2"
 import MermaidSetup from "./MermaidSetup"
 import RechartSetUp from "./RechartSetUp"
 import { downloadPdf } from "../services/api"
 import Button from "./ui/Button"
 import Badge from "./ui/Badge"
+import EmptyState from "./ui/EmptyState"
 
 const markdownComponents = {
   h1: ({ children }) => (
@@ -41,7 +42,13 @@ export default function FinalResult({ result }) {
     !result.questions.long ||
     !result.revisionPoints
   ) {
-    return null
+    return (
+      <EmptyState
+        icon={HiExclamationTriangle}
+        title="Incomplete note data"
+        description="This note is missing required sections and can’t be displayed."
+      />
+    )
   }
 
   return (

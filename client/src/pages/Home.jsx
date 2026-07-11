@@ -7,7 +7,6 @@ import {
   HiArrowDownTray,
   HiBolt,
   HiSparkles,
-  HiCheckCircle,
   HiQuestionMarkCircle,
   HiClock,
   HiShieldCheck,
@@ -19,10 +18,8 @@ import FAQSection from "../components/landing/FAQSection"
 import LandingFooter from "../components/landing/LandingFooter"
 import FeatureCard from "../components/ui/FeatureCard"
 import Button from "../components/ui/Button"
-import Badge from "../components/ui/Badge"
-import img from "../assets/img1.png"
-
-/* ─── Data ─── */
+import { BRAND_NAME, BRAND_TAGLINE } from "../constants/brand"
+import img from "../assets/indian-students.png"
 
 const features = [
   {
@@ -92,8 +89,6 @@ const trustBadges = [
   "Secure Google Auth",
 ]
 
-/* ─── Page ─── */
-
 export default function Home() {
   const navigate = useNavigate()
   const { userData } = useSelector((state) => state.user)
@@ -105,110 +100,94 @@ export default function Home() {
     <div className="min-h-screen mesh-bg">
       <LandingNavbar />
 
-      {/* ── 1. Hero ── */}
-      <section className="relative pt-28 pb-20 lg:pt-36 lg:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Hero — brand, headline, support, CTAs, product visual */}
+      <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-24 left-[10%] w-80 h-80 bg-brand-500/20 rounded-full blur-3xl" />
-          <div className="absolute top-40 right-[5%] w-96 h-96 bg-violet-500/15 rounded-full blur-3xl" />
+          <div className="absolute top-40 right-[5%] w-96 h-96 bg-brand-400/12 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-brand-500/30 to-transparent" />
         </div>
 
         <div className="relative max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <Badge color="brand" className="mb-6">
-              <HiSparkles className="text-sm" /> AI Powered Smart Study Assistant
-            </Badge>
+            <p className="text-sm font-semibold tracking-wide text-brand-600 dark:text-brand-400 mb-4">
+              {BRAND_NAME}
+            </p>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold leading-[1.08] tracking-tight text-[var(--color-text-primary)] mb-6">
-              Turn any topic into{" "}
-              <span className="gradient-text">exam-ready notes</span>{" "}
-              in seconds
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold leading-[1.08] tracking-tight text-[var(--color-text-primary)] mb-5">
+              {BRAND_TAGLINE}
             </h1>
 
             <p className="text-lg text-[var(--color-text-secondary)] max-w-xl leading-relaxed mb-8">
-              ExamNotesAI generates structured study notes, revision cheat sheets,
-              flow diagrams, and practice questions — so you spend less time
-              organizing and more time learning.
+              Turn any topic into structured study notes, revision sheets, diagrams, and practice questions — in seconds.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" onClick={() => navigate(ctaPath)} icon={<HiSparkles />}>
                 {ctaLabel}
               </Button>
-              <Button size="lg" variant="secondary" onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}>
-                Watch Demo
+              <Button
+                size="lg"
+                variant="secondary"
+                onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+              >
+                See how it works
               </Button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
-              {stats.map(({ value, label }) => (
-                <div key={label}>
-                  <p className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)]">{value}</p>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {trustBadges.map((b) => (
-                <span
-                  key={b}
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)]/60"
-                >
-                  <HiShieldCheck className="text-emerald-500" />
-                  {b}
-                </span>
-              ))}
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            <div className="glass-strong rounded-3xl p-2 shadow-2xl shadow-brand-500/10">
+            <div className="rounded-3xl overflow-hidden shadow-2xl shadow-brand-500/15 ring-1 ring-[var(--color-border)]">
               <img
                 src={img}
-                alt="ExamNotesAI dashboard preview"
-                className="rounded-2xl w-full object-cover aspect-[4/3]"
+                alt={`${BRAND_NAME} — Indian students studying`}
+                className="w-full object-cover aspect-[4/3] object-center"
               />
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.7 }}
-              className="absolute -bottom-4 -left-4 glass-strong rounded-2xl px-4 py-3 shadow-xl"
-            >
-              <div className="flex items-center gap-2">
-                <HiCheckCircle className="text-emerald-500 text-xl" />
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text-primary)]">Notes generated</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">Operating Systems · 10 credits</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.9 }}
-              className="absolute -top-3 -right-3 glass-strong rounded-2xl px-4 py-3 shadow-xl hidden sm:block"
-            >
-              <p className="text-2xl font-bold text-brand-600 dark:text-brand-400">50</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Free credits</p>
-            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* ── 2. Features ── */}
+      {/* Trust + stats — below first viewport */}
+      <section className="px-4 sm:px-6 lg:px-8 pb-16 lg:pb-20">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-10"
+          >
+            {stats.map(({ value, label }) => (
+              <div key={label} className="text-center sm:text-left">
+                <p className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)]">{value}</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{label}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+            {trustBadges.map((b) => (
+              <span
+                key={b}
+                className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] px-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-elevated)]/60"
+              >
+                <HiShieldCheck className="text-emerald-500" />
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="features" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <SectionHeader
@@ -224,7 +203,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 3. How it works ── */}
       <section id="how-it-works" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface-elevated)]/50">
         <div className="max-w-7xl mx-auto">
           <SectionHeader
@@ -259,16 +237,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 4. Demo preview ── */}
       <DemoPreviewSection />
-
-      {/* ── 5. Testimonials ── */}
       <TestimonialsSection />
-
-      {/* ── 6. FAQ ── */}
       <FAQSection />
-
-      {/* ── 7. Footer (with CTA) ── */}
       <LandingFooter />
     </div>
   )

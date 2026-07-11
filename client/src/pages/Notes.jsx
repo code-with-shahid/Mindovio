@@ -1,17 +1,24 @@
 import { useState } from "react"
-import { motion } from "motion/react"
+import { useNavigate } from "react-router-dom"
+import { motion, AnimatePresence } from "motion/react"
+import { HiDocumentText, HiCreditCard } from "react-icons/hi2"
 import DashboardLayout from "../components/layout/DashboardLayout"
 import { DashboardTopbar } from "../components/layout/Navbar"
 import TopicForm from "../components/TopicForm"
 import Sidebar from "../components/Sidebar"
 import FinalResult from "../components/FinalResult"
 import Card from "../components/ui/Card"
-import { HiDocumentText } from "react-icons/hi2"
+import Alert from "../components/ui/Alert"
+import EmptyState from "../components/ui/EmptyState"
+import Button from "../components/ui/Button"
+import { NotesResultSkeleton } from "../components/ui/Skeleton"
 
 export default function Notes() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState("")
+  const [lowCredits, setLowCredits] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <DashboardLayout>
@@ -26,43 +33,49 @@ export default function Notes() {
           setResult={setResult}
           setLoading={setLoading}
           setError={setError}
+          setLowCredits={setLowCredits}
         />
 
+        <AnimatePresence>
+          {error && (
+            <Alert
+              variant="error"
+              onDismiss={() => { setError(""); setLowCredits(false) }}
+            >
+              <div className="space-y-2">
+                <p>{error}</p>
+                {lowCredits && (
+                  <Button size="sm" onClick={() => navigate("/pricing")} icon={<HiCreditCard />}>
+                    Buy credits
+                  </Button>
+                )}
+              </div>
+            </Alert>
+          )}
+        </AnimatePresence>
+
         {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-4"
-          >
-            <p className="text-sm font-medium text-brand-600 dark:text-brand-400 animate-pulse">
-              Generating exam-focused notes…
-            </p>
-          </motion.div>
-        )}
-
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400 text-center"
-          >
-            {error}
-          </motion.div>
-        )}
-
-        {!result && !loading && (
-          <Card glass className="h-64 flex flex-col items-center justify-center text-center">
-            <div className="h-14 w-14 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-4">
-              <HiDocumentText className="text-2xl text-brand-600 dark:text-brand-400" />
+          <Card padding="p-0" className="overflow-hidden">
+            <div className="px-6 pt-5 pb-2">
+              <p className="text-sm font-medium text-brand-600 dark:text-brand-400 animate-pulse">
+                Generating exam-focused notes…
+              </p>
             </div>
-            <p className="text-[var(--color-text-primary)] font-medium mb-1">No notes yet</p>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Enter a topic above and click Generate to get started
-            </p>
+            <NotesResultSkeleton />
           </Card>
         )}
 
-        {result && (
+        {!result && !loading && (
+          <Card glass padding="p-0">
+            <EmptyState
+              icon={HiDocumentText}
+              title="No notes yet"
+              description="Enter a topic above and click Generate to get started"
+            />
+          </Card>
+        )}
+
+        {result && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}

@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import { useSelector } from "react-redux"
 import { HiBars3, HiXMark, HiSparkles } from "react-icons/hi2"
-import logo from "../../assets/logo.png"
 import ThemeToggle from "../ui/ThemeToggle"
 import Button from "../ui/Button"
+import BrandLogo from "../ui/BrandLogo"
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -33,17 +33,8 @@ export default function LandingNavbar() {
       className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4"
     >
       <nav className="glass-strong mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-5 py-3 rounded-2xl">
-        <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <img src={logo} alt="ExamNotesAI" className="h-9 w-9 rounded-lg" />
-          <div className="hidden sm:block">
-            <span className="text-base font-bold text-[var(--color-text-primary)] leading-tight block">
-              ExamNotes<span className="text-brand-600 dark:text-brand-400">AI</span>
-            </span>
-            <span className="text-[10px] text-[var(--color-text-muted)] leading-none">
-              AI Powered Smart Study Assistant
-            </span>
-          </div>
-        </Link>
+        <BrandLogo showTagline className="hidden sm:flex" />
+        <BrandLogo size="sm" className="sm:hidden" />
 
         <div className="hidden lg:flex items-center gap-7 text-sm font-medium text-[var(--color-text-secondary)]">
           {navLinks.map(({ label, href }) => (

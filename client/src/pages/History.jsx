@@ -2,14 +2,17 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
-import { HiPlus, HiDocumentText, HiMagnifyingGlass } from "react-icons/hi2"
+import { HiPlus, HiDocumentText, HiMagnifyingGlass, HiArrowPath } from "react-icons/hi2"
 import DashboardLayout from "../components/layout/DashboardLayout"
 import { DashboardTopbar } from "../components/layout/Navbar"
 import FinalResult from "../components/FinalResult"
 import Card from "../components/ui/Card"
 import Badge from "../components/ui/Badge"
 import Button from "../components/ui/Button"
-import Spinner from "../components/ui/Spinner"
+import Alert from "../components/ui/Alert"
+import EmptyState from "../components/ui/EmptyState"
+import { HistoryListSkeleton, NotesResultSkeleton } from "../components/ui/Skeleton"
+import { useToast } from "../context/ToastContext"
 import { serverUrl } from "../config"
 
 export default function History() {
@@ -19,30 +22,42 @@ export default function History() {
   const [selectedNote, setSelectedNote] = useState(null)
   const [loading, setLoading] = useState(false)
   const [listLoading, setListLoading] = useState(true)
+  const [listError, setListError] = useState("")
+  const [noteError, setNoteError] = useState("")
   const navigate = useNavigate()
+  const { toast } = useToast()
+
+  const fetchNotes = async () => {
+    setListLoading(true)
+    setListError("")
+    try {
+      const res = await axios.get(serverUrl + "/api/notes/getnotes", { withCredentials: true })
+      setTopics(Array.isArray(res.data) ? res.data : [])
+    } catch (error) {
+      console.error(error)
+      setListError("Couldn’t load your notes. Check your connection and try again.")
+      toast("Failed to load note history", "error")
+    } finally {
+      setListLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const res = await axios.get(serverUrl + "/api/notes/getnotes", { withCredentials: true })
-        setTopics(Array.isArray(res.data) ? res.data : [])
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setListLoading(false)
-      }
-    }
     fetchNotes()
   }, [])
 
   const openNote = async (noteId) => {
     setLoading(true)
     setActiveNoteId(noteId)
+    setNoteError("")
     try {
       const res = await axios.get(serverUrl + `/api/notes/${noteId}`, { withCredentials: true })
       setSelectedNote(res.data.content)
     } catch (error) {
       console.error(error)
+      setSelectedNote(null)
+      setNoteError("Couldn’t open this note. Please try again.")
+      toast("Failed to open note", "error")
     } finally {
       setLoading(false)
     }
@@ -57,7 +72,6 @@ export default function History() {
       <DashboardTopbar title="Note History" subtitle="Browse and review your previously generated notes" />
 
       <div className="grid lg:grid-cols-4 gap-6">
-        {/* Sidebar list */}
         <div className="lg:col-span-1 space-y-4">
           <Button
             variant="primary"
@@ -72,7 +86,7 @@ export default function History() {
             <div className="relative mb-4">
               <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
-                type="text"
+                type="search"
                 placeholder="Search topics…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -80,10 +94,21 @@ export default function History() {
               />
             </div>
 
+            {listError && (
+              <Alert variant="error" className="mb-3" onDismiss={() => setListError("")}>
+                <div className="space-y-2">
+                  <p>{listError}</p>
+                  <Button size="sm" variant="outline" icon={<HiArrowPath />} onClick={fetchNotes}>
+                    Retry
+                  </Button>
+                </div>
+              </Alert>
+            )}
+
             <div className="flex-1 overflow-y-auto space-y-2 -mx-1 px-1">
               {listLoading ? (
-                <div className="py-8"><Spinner className="mx-auto" /></div>
-              ) : filtered.length === 0 ? (
+                <HistoryListSkeleton />
+              ) : filtered.length === 0 && !listError ? (
                 <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
                   {search ? "No matching notes" : "No notes created yet"}
                 </p>
@@ -117,7 +142,6 @@ export default function History() {
           </Card>
         </div>
 
-        {/* Content panel */}
         <div className="lg:col-span-3">
           <Card padding="p-0" className="min-h-[60vh] overflow-hidden">
             <AnimatePresence mode="wait">
@@ -127,24 +151,31 @@ export default function History() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-64 flex items-center justify-center"
                 >
-                  <Spinner />
+                  <NotesResultSkeleton />
+                </motion.div>
+              ) : noteError ? (
+                <motion.div key="note-error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <EmptyState
+                    icon={HiDocumentText}
+                    title="Couldn’t load note"
+                    description={noteError}
+                    action={
+                      activeNoteId && (
+                        <Button icon={<HiArrowPath />} onClick={() => openNote(activeNoteId)}>
+                          Try again
+                        </Button>
+                      )
+                    }
+                  />
                 </motion.div>
               ) : !selectedNote ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="h-64 flex flex-col items-center justify-center text-center p-8"
-                >
-                  <div className="h-14 w-14 rounded-2xl bg-brand-500/10 flex items-center justify-center mb-4">
-                    <HiDocumentText className="text-2xl text-brand-600 dark:text-brand-400" />
-                  </div>
-                  <p className="text-[var(--color-text-primary)] font-medium">Select a note</p>
-                  <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                    Choose a topic from the sidebar to view its content
-                  </p>
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <EmptyState
+                    icon={HiDocumentText}
+                    title="Select a note"
+                    description="Choose a topic from the sidebar to view its content"
+                  />
                 </motion.div>
               ) : (
                 <motion.div

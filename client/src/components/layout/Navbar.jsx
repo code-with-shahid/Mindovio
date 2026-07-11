@@ -32,11 +32,17 @@ export function DashboardTopbar({ title, subtitle }) {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={() => navigate("/pricing")}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:bg-brand-500/5 transition-colors"
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-colors ${
+              credits < 10
+                ? "border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/15"
+                : "border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:bg-brand-500/5"
+            }`}
           >
-            <HiSparkles className="text-brand-500" />
+            <HiSparkles className={credits < 10 ? "text-amber-500" : "text-brand-500"} />
             <span className="text-sm font-semibold text-[var(--color-text-primary)]">{credits}</span>
-            <span className="hidden sm:inline text-xs text-[var(--color-text-muted)]">credits</span>
+            <span className="hidden sm:inline text-xs text-[var(--color-text-muted)]">
+              {credits < 10 ? "low" : "credits"}
+            </span>
           </button>
 
           <ThemeToggle />
