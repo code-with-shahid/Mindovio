@@ -1,3 +1,5 @@
-export const BRAND_NAME = "ExamNotesAI"
+export const BRAND_NAME = "Mindovio"
 export const BRAND_TAGLINE = "AI Powered Smart Study Assistant"
-export const BRAND_SHORT = "ExamNotes"
+export const BRAND_SHORT = "Mindovio"
+export const BRAND_EMAIL = "support@mindovio.com"
+export const BRAND_DOMAIN = "mindovio.com"

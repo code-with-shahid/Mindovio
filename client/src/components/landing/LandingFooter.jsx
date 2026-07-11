@@ -4,7 +4,7 @@ import { useSelector } from "react-redux"
 import { HiSparkles } from "react-icons/hi2"
 import BrandLogo from "../ui/BrandLogo"
 import Button from "../ui/Button"
-import { BRAND_NAME } from "../../constants/brand"
+import { BRAND_NAME, BRAND_EMAIL } from "../../constants/brand"
 
 const footerLinks = {
   product: [
@@ -16,7 +16,7 @@ const footerLinks = {
   support: [
     { label: "FAQ", href: "#faq" },
     { label: "Testimonials", href: "#testimonials" },
-    { label: "Contact", href: "mailto:support@examnotes.ai" },
+    { label: "Contact", href: `mailto:${BRAND_EMAIL}` },
   ],
 }
 

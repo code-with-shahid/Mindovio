@@ -5,14 +5,14 @@ const ThemeContext = createContext(null)
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "light"
-    return localStorage.getItem("examnotes-theme") || "light"
+    return localStorage.getItem("mindovio-theme") || "light"
   })
 
   useEffect(() => {
     const root = document.documentElement
     root.classList.remove("light", "dark")
     root.classList.add(theme)
-    localStorage.setItem("examnotes-theme", theme)
+    localStorage.setItem("mindovio-theme", theme)
   }, [theme])
 
   const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"))

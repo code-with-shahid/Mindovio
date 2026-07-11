@@ -16,7 +16,7 @@ export default function FAQSection() {
             Frequently asked questions
           </h2>
           <p className="text-[var(--color-text-secondary)]">
-            Everything you need to know about ExamNotesAI.
+            Everything you need to know about Mindovio.
           </p>
         </div>
 
@@ -71,8 +71,8 @@ function AnimateHeight({ open, children }) {
 
 const faqs = [
   {
-    q: "What is ExamNotesAI?",
-    a: "ExamNotesAI is an AI-powered study assistant that generates exam-focused notes, revision cheat sheets, flow diagrams, practice questions, and downloadable PDFs — tailored to your class level and exam type.",
+    q: "What is Mindovio?",
+    a: "Mindovio is an AI-powered study assistant that generates exam-focused notes, revision cheat sheets, flow diagrams, practice questions, and downloadable PDFs — tailored to your class level and exam type.",
   },
   {
     q: "How many credits do I get for free?",
@@ -80,7 +80,7 @@ const faqs = [
   },
   {
     q: "Which exams and subjects are supported?",
-    a: "ExamNotesAI works with any academic topic — CBSE, ICSE, JEE, NEET, GATE, university semesters, and more. Simply enter your topic, class level, and exam type for customized output.",
+    a: "Mindovio works with any academic topic — CBSE, ICSE, JEE, NEET, GATE, university semesters, and more. Simply enter your topic, class level, and exam type for customized output.",
   },
   {
     q: "How long does generation take?",
@@ -91,7 +91,7 @@ const faqs = [
     a: "Yes. Every generated note set can be exported as a clean, printable PDF including sub-topics, detailed notes, revision points, and practice questions.",
   },
   {
-    q: "What AI model powers ExamNotesAI?",
-    a: "ExamNotesAI uses Google Gemini to produce structured, exam-oriented content. Our prompt engineering ensures consistent JSON output with markdown notes, Mermaid diagrams, and chart data.",
+    q: "What AI model powers Mindovio?",
+    a: "Mindovio uses Google Gemini to produce structured, exam-oriented content. Our prompt engineering ensures consistent JSON output with markdown notes, Mermaid diagrams, and chart data.",
   },
 ]

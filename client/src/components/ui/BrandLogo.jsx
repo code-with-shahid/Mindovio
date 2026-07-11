@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import logo from "../../assets/logo.png"
-import { BRAND_NAME, BRAND_TAGLINE, BRAND_SHORT } from "../../constants/brand"
+import { BRAND_NAME, BRAND_TAGLINE } from "../../constants/brand"
 
 export default function BrandLogo({
   to = "/",
@@ -20,8 +20,7 @@ export default function BrandLogo({
       <img src={logo} alt={BRAND_NAME} className={`${s.img} rounded-lg`} />
       <div className="min-w-0">
         <span className={`${s.text} font-bold text-[var(--color-text-primary)] leading-tight block`}>
-          {BRAND_SHORT}
-          <span className="text-brand-600 dark:text-brand-400">AI</span>
+          {BRAND_NAME}
         </span>
         {showTagline && (
           <span className={`${s.tag} text-[var(--color-text-muted)] leading-none block`}>

@@ -8,7 +8,7 @@ const testimonials = [
     avatar: "PS",
     rating: 5,
     quote:
-      "ExamNotesAI saved me hours before my Physics board exam. The revision mode cheat sheet was exactly what I needed for last-minute prep.",
+      "Mindovio saved me hours before my Physics board exam. The revision mode cheat sheet was exactly what I needed for last-minute prep.",
   },
   {
     name: "Arjun Mehta",
@@ -64,7 +64,7 @@ export default function TestimonialsSection() {
             Loved by students across India
           </h2>
           <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-            From board exams to competitive tests — see why thousands of students trust ExamNotesAI.
+            From board exams to competitive tests — see why thousands of students trust Mindovio.
           </p>
         </div>
 

@@ -27,7 +27,7 @@ export default function DemoPreviewSection() {
             Live Preview
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
-            See ExamNotesAI in action
+            See Mindovio in action
           </h2>
           <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto">
             A glimpse of the structured, exam-ready output you'll get in under two minutes.
@@ -51,7 +51,7 @@ export default function DemoPreviewSection() {
               </div>
               <div className="flex-1 mx-4">
                 <div className="max-w-md mx-auto px-4 py-1 rounded-lg bg-[var(--color-surface-elevated)] text-xs text-[var(--color-text-muted)] text-center">
-                  app.examnotes.ai/notes
+                  app.mindovio.com/notes
                 </div>
               </div>
             </div>
