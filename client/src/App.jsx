@@ -8,6 +8,8 @@ import Pricing from "./pages/Pricing"
 import PaymentSuccess from "./pages/PaymentSuccess"
 import PaymentFailed from "./pages/PaymentFailed"
 import NotFound from "./pages/NotFound"
+import MockTest from "./pages/MockTest"
+import MockTestHistory from "./pages/MockTestHistory"
 import ProtectedRoute, { GuestRoute } from "./components/layout/ProtectedRoute"
 import { useAuth } from "./context/AuthContext"
 import { PageLoader } from "./components/ui/Spinner"
@@ -28,6 +30,8 @@ function App() {
       <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+      <Route path="/mock-tests" element={<ProtectedRoute><MockTestHistory /></ProtectedRoute>} />
+      <Route path="/mock-test/:testId" element={<ProtectedRoute><MockTest /></ProtectedRoute>} />
 
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />

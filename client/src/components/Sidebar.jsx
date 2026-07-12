@@ -32,7 +32,7 @@ export default function Sidebar({ result }) {
   }
 
   return (
-    <Card glass className="space-y-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
+    <Card glass className="space-y-5 lg:sticky lg:top-24 max-h-[min(50vh,24rem)] lg:max-h-[calc(100vh-7rem)] overflow-y-auto">
       <div className="flex items-center gap-2">
         <HiStar className="text-brand-500" />
         <h3 className="font-semibold text-[var(--color-text-primary)]">Study navigator</h3>

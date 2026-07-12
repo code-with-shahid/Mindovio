@@ -16,6 +16,7 @@ import { NotesResultSkeleton } from "../components/ui/Skeleton"
 export default function Notes() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+  const [noteId, setNoteId] = useState(null)
   const [error, setError] = useState("")
   const [lowCredits, setLowCredits] = useState(false)
   const navigate = useNavigate()
@@ -31,6 +32,7 @@ export default function Notes() {
         <TopicForm
           loading={loading}
           setResult={setResult}
+          setNoteId={setNoteId}
           setLoading={setLoading}
           setError={setError}
           setLowCredits={setLowCredits}
@@ -40,7 +42,10 @@ export default function Notes() {
           {error && (
             <Alert
               variant="error"
-              onDismiss={() => { setError(""); setLowCredits(false) }}
+              onDismiss={() => {
+                setError("")
+                setLowCredits(false)
+              }}
             >
               <div className="space-y-2">
                 <p>{error}</p>
@@ -80,14 +85,14 @@ export default function Notes() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="grid lg:grid-cols-4 gap-6"
+            className="grid lg:grid-cols-4 gap-4 sm:gap-6 min-w-0"
           >
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 order-2 lg:order-1 min-w-0">
               <Sidebar result={result} />
             </div>
-            <div className="lg:col-span-3">
-              <Card padding="p-0" className="overflow-hidden">
-                <FinalResult result={result} />
+            <div className="lg:col-span-3 order-1 lg:order-2 min-w-0">
+              <Card padding="p-0" className="overflow-hidden min-w-0">
+                <FinalResult result={result} noteId={noteId} />
               </Card>
             </div>
           </motion.div>

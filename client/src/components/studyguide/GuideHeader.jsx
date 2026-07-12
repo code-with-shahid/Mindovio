@@ -35,11 +35,11 @@ export default function GuideHeader({
             </Badge>
           )}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-2">
+        <h1 className="type-h1 mb-2.5">
           {title || "Study Guide"}
         </h1>
         {overview && (
-          <p className="text-[var(--color-text-secondary)] leading-relaxed max-w-3xl">
+          <p className="type-body-lg max-w-3xl">
             {overview}
           </p>
         )}

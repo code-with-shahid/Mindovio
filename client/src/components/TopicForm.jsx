@@ -33,7 +33,7 @@ function getGenerateError(error) {
   }
 }
 
-export default function TopicForm({ setResult, setLoading, loading, setError, setLowCredits }) {
+export default function TopicForm({ setResult, setLoading, loading, setError, setLowCredits, setNoteId }) {
   const [topic, setTopic] = useState("")
   const [classLevel, setClassLevel] = useState("")
   const [examType, setExamType] = useState("")
@@ -55,12 +55,14 @@ export default function TopicForm({ setResult, setLoading, loading, setError, se
     setLowCredits?.(false)
     setLoading(true)
     setResult(null)
+    setNoteId?.(null)
     try {
       const result = await generateNotes({
         topic, classLevel, examType, revisionMode, includeDiagram, includeChart,
       })
       if (result?.data) {
         setResult(result.data)
+        setNoteId?.(result.noteId || null)
         if (typeof result.creditsLeft === "number") {
           dispatch(updateCredits(result.creditsLeft))
         }
@@ -106,13 +108,7 @@ export default function TopicForm({ setResult, setLoading, loading, setError, se
     return () => clearInterval(interval)
   }, [loading])
 
-  const inputClass = `
-    w-full px-4 py-3 text-sm rounded-xl
-    border border-[var(--color-border)] bg-[var(--color-surface-muted)]
-    text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]
-    focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500/50
-    transition-all duration-200
-  `
+  const inputClass = "ui-input"
 
   return (
     <Card glass className="space-y-5">
@@ -121,8 +117,8 @@ export default function TopicForm({ setResult, setLoading, loading, setError, se
           <HiSparkles className="text-brand-600 dark:text-brand-400" />
         </div>
         <div>
-          <h2 className="font-semibold text-[var(--color-text-primary)]">New Generation</h2>
-          <p className="text-xs text-[var(--color-text-muted)]">Costs 10 credits per generation</p>
+          <h2 className="type-h4">New Generation</h2>
+          <p className="type-caption mt-0.5">Costs 10 credits per generation</p>
         </div>
       </div>
 
@@ -218,7 +214,7 @@ function Toggle({ label, checked, onChange, disabled }) {
         />
       </div>
       <span className={`text-sm font-medium transition-colors ${
-        checked ? "text-brand-600 dark:text-brand-400" : "text-[var(--color-text-secondary)]"
+        checked ? "text-brand-600 dark:text-brand-400" : "text-secondary"
       }`}>
         {label}
       </span>

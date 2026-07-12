@@ -101,7 +101,7 @@ export default function Pricing() {
         )}
       </AnimatePresence>
 
-      <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto min-w-0">
         {plans.map((plan, i) => (
           <PricingCard
             key={plan.title}

@@ -1,5 +1,17 @@
+import { cleanMermaidSource } from "./cleanMermaid.js"
+
 const asArray = (v) => (Array.isArray(v) ? v : [])
 const asString = (v, fallback = "") => (typeof v === "string" ? v : fallback)
+
+function cleanDiagramEntry(entry) {
+  if (!entry || typeof entry !== "object") return null
+  const mermaid = cleanMermaidSource(entry.mermaid || entry.data || "")
+  if (!mermaid) return null
+  return {
+    title: asString(entry.title),
+    mermaid,
+  }
+}
 
 /**
  * Ensures legacy + premium fields exist so PDF, History, and UI never crash.
@@ -17,6 +29,11 @@ export function normalizeStudyGuide(raw) {
 
   const questions = data.questions && typeof data.questions === "object" ? data.questions : {}
 
+  const primaryDiagram = cleanMermaidSource(data.diagram?.data)
+  const diagrams = asArray(data.diagrams)
+    .map(cleanDiagramEntry)
+    .filter(Boolean)
+
   return {
     title: asString(data.title, "Study Guide"),
     overview: asString(data.overview),
@@ -33,9 +50,9 @@ export function normalizeStudyGuide(raw) {
     tables: asArray(data.tables),
     diagram: {
       type: asString(data.diagram?.type, "flowchart"),
-      data: asString(data.diagram?.data),
+      data: primaryDiagram,
     },
-    diagrams: asArray(data.diagrams),
+    diagrams,
     charts: asArray(data.charts),
     commonMistakes: asArray(data.commonMistakes),
     tipsAndTricks: asArray(data.tipsAndTricks),

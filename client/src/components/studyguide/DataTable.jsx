@@ -2,21 +2,18 @@ export default function DataTable({ title, headers = [], rows = [] }) {
   if (!headers.length || !rows.length) return null
 
   return (
-    <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface-elevated)]">
+    <div className="rounded-2xl border border-[var(--color-border)] overflow-hidden bg-[var(--color-surface-elevated)] min-w-0">
       {title && (
-        <div className="px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
-          <h4 className="text-sm font-semibold text-[var(--color-text-primary)]">{title}</h4>
+        <div className="px-3 sm:px-4 py-3 sm:py-3.5 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+          <h4 className="type-h4">{title}</h4>
         </div>
       )}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left min-w-[320px]">
-          <thead>
-            <tr className="border-b border-[var(--color-border)]">
+      <div className="overflow-x-auto scroll-x">
+        <table className="ui-table min-w-[min(100%,320px)] w-full">
+          <thead className="sticky top-0 z-[1] bg-[var(--color-surface-muted)]">
+            <tr>
               {headers.map((h, i) => (
-                <th
-                  key={i}
-                  className="px-4 py-2.5 font-semibold text-[var(--color-text-primary)] whitespace-nowrap"
-                >
+                <th key={i} className="whitespace-nowrap">
                   {h}
                 </th>
               ))}
@@ -24,9 +21,9 @@ export default function DataTable({ title, headers = [], rows = [] }) {
           </thead>
           <tbody>
             {rows.map((row, ri) => (
-              <tr key={ri} className="border-b border-[var(--color-border)] last:border-0">
+              <tr key={ri}>
                 {(Array.isArray(row) ? row : []).map((cell, ci) => (
-                  <td key={ci} className="px-4 py-2.5 text-[var(--color-text-secondary)] align-top">
+                  <td key={ci} className="align-top">
                     {cell}
                   </td>
                 ))}

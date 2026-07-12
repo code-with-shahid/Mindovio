@@ -14,7 +14,7 @@ function isValidResult(result) {
   )
 }
 
-export default function FinalResult({ result }) {
+export default function FinalResult({ result, noteId }) {
   if (!isValidResult(result)) {
     return (
       <EmptyState
@@ -28,8 +28,8 @@ export default function FinalResult({ result }) {
   const data = normalizeResult(result)
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <StudyGuide result={data} />
+    <div className="p-3 sm:p-4 lg:p-6 xl:p-8 min-w-0">
+      <StudyGuide result={data} noteId={noteId} />
     </div>
   )
 }

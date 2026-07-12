@@ -1,3 +1,5 @@
+import { cleanMermaidSource } from "./mermaidClean"
+
 const asArray = (v) => (Array.isArray(v) ? v : [])
 const asString = (v, fallback = "") => (typeof v === "string" ? v : fallback)
 
@@ -6,6 +8,14 @@ export function normalizeResult(raw) {
   if (!raw || typeof raw !== "object") return raw
 
   const questions = raw.questions && typeof raw.questions === "object" ? raw.questions : {}
+  const diagrams = asArray(raw.diagrams)
+    .map((d) => {
+      if (!d || typeof d !== "object") return null
+      const mermaid = cleanMermaidSource(d.mermaid || d.data || "")
+      if (!mermaid) return null
+      return { title: asString(d.title), mermaid }
+    })
+    .filter(Boolean)
 
   return {
     ...raw,
@@ -24,9 +34,9 @@ export function normalizeResult(raw) {
     tables: asArray(raw.tables),
     diagram: {
       type: asString(raw.diagram?.type, "flowchart"),
-      data: asString(raw.diagram?.data),
+      data: cleanMermaidSource(raw.diagram?.data),
     },
-    diagrams: asArray(raw.diagrams),
+    diagrams,
     charts: asArray(raw.charts),
     commonMistakes: asArray(raw.commonMistakes),
     tipsAndTricks: asArray(raw.tipsAndTricks),

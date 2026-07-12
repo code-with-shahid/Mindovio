@@ -7,6 +7,7 @@ import { getCurrentUser } from "../services/api"
 import Button from "../components/ui/Button"
 import Card from "../components/ui/Card"
 import BrandLogo from "../components/ui/BrandLogo"
+import AmbientBackground from "../components/landing/motion/AmbientBackground"
 
 export default function PaymentFailed() {
   const dispatch = useDispatch()
@@ -19,11 +20,12 @@ export default function PaymentFailed() {
   }, [dispatch, navigate])
 
   return (
-    <div className="min-h-screen mesh-bg flex flex-col">
-      <header className="px-6 py-5">
+    <div className="app-shell relative min-h-screen flex flex-col overflow-hidden">
+      <AmbientBackground variant="app" />
+      <header className="relative z-10 px-6 py-5">
         <BrandLogo showTagline />
       </header>
-      <div className="flex-1 flex items-center justify-center p-4 pb-16">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-4 pb-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}

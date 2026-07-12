@@ -1,20 +1,16 @@
 import { motion } from "motion/react"
-import Card from "./Card"
+import Card, { CardDescription, CardTitle } from "./Card"
+import { staggerItem } from "../landing/motion/SectionReveal"
 
-export default function FeatureCard({ icon: Icon, title, description, delay = 0 }) {
+export default function FeatureCard({ icon: Icon, title, description }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay }}
-    >
-      <Card hover glass className="h-full group">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 mb-4 transition-transform duration-300 group-hover:scale-110">
-          <Icon className="text-xl" />
+    <motion.div variants={staggerItem} className="h-full">
+      <Card hover={false} glass className="h-full group premium-card">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#7C5CFF]/25 to-[#4F8BFF]/15 text-[#A855F7] mb-5 border border-white/10">
+          <Icon className="icon-lift" size={22} strokeWidth={1.75} />
         </div>
-        <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">{title}</h3>
-        <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">{description}</p>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </Card>
     </motion.div>
   )

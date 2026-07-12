@@ -15,7 +15,7 @@ export default function Card({
   const Wrapper = hover ? motion.div : "div"
   const motionProps = hover
     ? {
-        whileHover: { y: -4, transition: { duration: 0.2 } },
+        whileHover: { y: -3, transition: { duration: 0.2 } },
         ...props,
       }
     : props
@@ -25,4 +25,16 @@ export default function Card({
       {children}
     </Wrapper>
   )
+}
+
+export function CardTitle({ children, className = "" }) {
+  return <h3 className={`card-title ${className}`}>{children}</h3>
+}
+
+export function CardDescription({ children, className = "" }) {
+  return <p className={`card-desc ${className}`}>{children}</p>
+}
+
+export function CardMeta({ children, className = "" }) {
+  return <p className={`card-meta ${className}`}>{children}</p>
 }

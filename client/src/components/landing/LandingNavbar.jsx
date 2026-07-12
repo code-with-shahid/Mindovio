@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import { useSelector } from "react-redux"
-import { HiBars3, HiXMark, HiSparkles } from "react-icons/hi2"
-import ThemeToggle from "../ui/ThemeToggle"
-import Button from "../ui/Button"
+import { Menu, X, Sparkles } from "lucide-react"
 import BrandLogo from "../ui/BrandLogo"
+import ThemeToggle from "../ui/ThemeToggle"
+import PremiumButton from "./motion/PremiumButton"
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -19,9 +19,45 @@ export default function LandingNavbar() {
   const { userData } = useSelector((state) => state.user)
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [active, setActive] = useState("")
+
+  useEffect(() => {
+    const ids = navLinks.map((l) => l.href.slice(1))
+    const observers = []
+
+    ids.forEach((id) => {
+      const el = document.getElementById(id)
+      if (!el) return
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActive(`#${id}`)
+        },
+        { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+      )
+      obs.observe(el)
+      observers.push(obs)
+    })
+
+    return () => observers.forEach((o) => o.disconnect())
+  }, [])
+
+  useEffect(() => {
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const onKey = (e) => {
+      if (e.key === "Escape") setMobileOpen(false)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [mobileOpen])
 
   const handleNav = (href) => {
     setMobileOpen(false)
+    setActive(href)
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" })
   }
 
@@ -30,69 +66,101 @@ export default function LandingNavbar() {
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-4"
+      className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4"
     >
-      <nav className="glass-strong mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-5 py-3 rounded-2xl">
-        <BrandLogo showTagline className="hidden sm:flex" />
-        <BrandLogo size="sm" className="sm:hidden" />
+      <nav className="landing-navbar mx-auto max-w-7xl flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl min-w-0">
+        <div className="relative min-w-0 shrink">
+          <span
+            className="pointer-events-none absolute -inset-2 rounded-xl bg-[#7C5CFF]/20 blur-md opacity-80"
+            aria-hidden
+          />
+          <BrandLogo showTagline className="hidden md:flex relative" />
+          <BrandLogo size="sm" className="md:hidden relative" />
+        </div>
 
-        <div className="hidden lg:flex items-center gap-7 text-sm font-medium text-[var(--color-text-secondary)]">
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium">
           {navLinks.map(({ label, href }) => (
             <button
               key={href}
+              type="button"
               onClick={() => handleNav(href)}
-              className="hover:text-[var(--color-text-primary)] transition-colors"
+              className={`nav-link-premium transition-colors whitespace-nowrap ${active === href ? "is-active" : ""}`}
             >
               {label}
             </button>
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <ThemeToggle />
           {userData ? (
-            <Button size="sm" onClick={() => navigate("/dashboard")} icon={<HiSparkles />}>
+            <PremiumButton size="sm" onClick={() => navigate("/dashboard")} icon={<Sparkles size={16} />}>
               <span className="hidden sm:inline">Dashboard</span>
               <span className="sm:hidden">App</span>
-            </Button>
+            </PremiumButton>
           ) : (
             <>
-              <Button size="sm" variant="ghost" className="hidden sm:inline-flex" onClick={() => navigate("/login")}>
+              <PremiumButton
+                size="sm"
+                variant="ghost"
+                className="hidden sm:inline-flex"
+                onClick={() => navigate("/login")}
+              >
                 Sign in
-              </Button>
-              <Button size="sm" onClick={() => navigate("/signup")}>
-                Get Started
-              </Button>
+              </PremiumButton>
+              <PremiumButton size="sm" onClick={() => navigate("/signup")}>
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+              </PremiumButton>
             </>
           )}
           <button
+            type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)]"
-            aria-label="Toggle menu"
+            className="lg:hidden p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/5"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="landing-mobile-menu"
           >
-            {mobileOpen ? <HiXMark className="text-xl" /> : <HiBars3 className="text-xl" />}
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="lg:hidden mx-auto max-w-7xl mt-2 glass-strong rounded-2xl p-4 shadow-xl"
-          >
-            {navLinks.map(({ label, href }) => (
-              <button
-                key={href}
-                onClick={() => handleNav(href)}
-                className="block w-full text-left px-3 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] rounded-lg transition-colors"
-              >
-                {label}
-              </button>
-            ))}
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 top-0 z-40 bg-black/40 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+              aria-hidden
+            />
+            <motion.div
+              id="landing-mobile-menu"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="lg:hidden relative z-50 mx-auto max-w-7xl mt-2 landing-navbar rounded-2xl p-3 sm:p-4 max-h-[min(70vh,28rem)] overflow-y-auto"
+            >
+              {navLinks.map(({ label, href }) => (
+                <button
+                  key={href}
+                  type="button"
+                  onClick={() => handleNav(href)}
+                  className={`block w-full text-left px-3 py-3 text-sm font-medium rounded-xl transition-colors ${
+                    active === href
+                      ? "bg-brand-500/10 text-brand-600 dark:text-brand-300"
+                      : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/5"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.header>

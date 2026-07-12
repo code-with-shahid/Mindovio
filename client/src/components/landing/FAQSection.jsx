@@ -1,54 +1,46 @@
 import { useState } from "react"
 import { motion } from "motion/react"
-import { HiChevronDown } from "react-icons/hi2"
+import { ChevronDown } from "lucide-react"
+import BloomHeading from "./motion/BloomHeading"
+import SectionReveal from "./motion/SectionReveal"
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(0)
 
   return (
-    <section id="faq" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="section-gap-lg px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider mb-3">
-            FAQ
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
-            Frequently asked questions
-          </h2>
-          <p className="text-[var(--color-text-secondary)]">
-            Everything you need to know about Mindovio.
-          </p>
-        </div>
+        <BloomHeading
+          eyebrow="FAQ"
+          text="Frequently asked questions"
+          subtitle="Everything you need to know about Mindovio."
+        />
 
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="glass rounded-2xl overflow-hidden"
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === i ? -1 : i)}
-                className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
-              >
-                <span className="font-semibold text-[var(--color-text-primary)] text-sm sm:text-base">
-                  {faq.q}
-                </span>
-                <HiChevronDown
-                  className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-200 ${
-                    openIndex === i ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <AnimateHeight open={openIndex === i}>
-                <p className="px-5 pb-4 text-sm text-[var(--color-text-secondary)] leading-relaxed">
-                  {faq.a}
-                </p>
-              </AnimateHeight>
-            </motion.div>
+            <SectionReveal key={i} delay={i * 0.04} y={14}>
+              <div className="premium-card rounded-2xl overflow-hidden group">
+                <button
+                  onClick={() => setOpenIndex(openIndex === i ? -1 : i)}
+                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                >
+                  <span className="font-medium text-[var(--color-text-primary)] text-sm sm:text-[0.95rem]">
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-200 icon-lift ${
+                      openIndex === i ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                <AnimateHeight open={openIndex === i}>
+                  <p className="px-5 pb-4 type-sm leading-relaxed text-[var(--color-text-secondary)]">
+                    {faq.a}
+                  </p>
+                </AnimateHeight>
+              </div>
+            </SectionReveal>
           ))}
         </div>
       </div>

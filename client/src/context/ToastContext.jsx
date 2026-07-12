@@ -35,7 +35,7 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ toast, dismiss }}>
       {children}
       <div
-        className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] pointer-events-none"
+        className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-4 z-[100] flex flex-col gap-2 max-w-sm sm:w-[calc(100%-2rem)] mx-auto sm:mx-0 pointer-events-none"
         aria-live="polite"
       >
         <AnimatePresence>

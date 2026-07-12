@@ -18,6 +18,7 @@ import FlashcardDeck from "./FlashcardDeck"
 import MarkdownBody from "./MarkdownBody"
 import IllustrationPlaceholder from "./IllustrationPlaceholder"
 import Badge from "../ui/Badge"
+import MockTestCTA from "../mocktest/MockTestCTA"
 import { downloadPdf } from "../../services/api"
 import { BRAND_NAME } from "../../constants/brand"
 
@@ -32,15 +33,15 @@ function SectionShell({ id, title, icon: Icon, children, onCopySection }) {
   return (
     <section id={id} className="scroll-mt-28 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-          {Icon && <Icon className="text-brand-500" />}
+        <h2 className="type-h3 flex items-center gap-2.5">
+          {Icon && <Icon className="text-brand-500 text-[1.05em]" />}
           {title}
         </h2>
         {onCopySection && (
           <button
             type="button"
             onClick={onCopySection}
-            className="text-xs text-[var(--color-text-muted)] hover:text-brand-600 print:hidden"
+            className="type-caption hover:text-brand-600 print:hidden transition-colors"
           >
             Copy section
           </button>
@@ -71,7 +72,7 @@ function ListCard({ items, tone = "neutral" }) {
   )
 }
 
-export default function StudyGuide({ result }) {
+export default function StudyGuide({ result, noteId }) {
   const containerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [quickRevision, setQuickRevision] = useState(false)
@@ -209,10 +210,30 @@ export default function StudyGuide({ result }) {
         copied={copied}
       />
 
-      <div className="grid lg:grid-cols-[200px_1fr] gap-6 mt-6">
-        {/* Sticky TOC */}
-        <nav className="hidden lg:block sticky top-24 self-start space-y-1 print:hidden">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
+      {/* Horizontal TOC — mobile / tablet */}
+      <nav className="lg:hidden mt-4 -mx-1 px-1 print:hidden" aria-label="On this page">
+        <div className="mobile-toc-scroll">
+          {toc.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => scrollTo(item.id)}
+              className={`shrink-0 type-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap ${
+                activeSection === item.id
+                  ? "border-brand-500/40 bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium"
+                  : "border-[var(--color-border)] text-[var(--color-text-muted)]"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <div className="grid lg:grid-cols-[200px_1fr] gap-4 sm:gap-6 mt-4 sm:mt-6 min-w-0">
+        {/* Sticky TOC — desktop */}
+        <nav className="hidden lg:block sticky top-24 self-start space-y-1 print:hidden min-w-0">
+          <p className="type-overline mb-3">
             On this page
           </p>
           {toc.map((item) => (
@@ -220,10 +241,10 @@ export default function StudyGuide({ result }) {
               key={item.id}
               type="button"
               onClick={() => scrollTo(item.id)}
-              className={`block w-full text-left text-xs px-2 py-1.5 rounded-lg truncate transition-colors ${
+              className={`block w-full text-left type-sm px-2.5 py-1.5 rounded-lg truncate transition-colors ${
                 activeSection === item.id
-                  ? "bg-brand-500/10 text-brand-600 dark:text-brand-400 font-semibold"
-                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+                  ? "bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium"
+                  : "text-muted hover:text-primary"
               }`}
             >
               {item.label}
@@ -231,7 +252,7 @@ export default function StudyGuide({ result }) {
           ))}
         </nav>
 
-        <div className="space-y-10 min-w-0">
+        <div className="space-y-8 sm:space-y-10 min-w-0">
           {quickRevision ? (
             <>
               <SectionShell id="revision" title="Quick revision sheet" icon={HiBolt}>
@@ -520,6 +541,8 @@ export default function StudyGuide({ result }) {
                   )}
                 </div>
               </SectionShell>
+
+              <MockTestCTA noteId={noteId} topic={result.topic} />
 
               {(result.flashcards?.length > 0 || result.revisionPoints?.length > 0) && (
                 <SectionShell id="revision" title="Revision kit" icon={HiBolt}>

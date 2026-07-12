@@ -31,3 +31,40 @@ export const downloadPdf = async (result) => {
   link.click()
   window.URL.revokeObjectURL(url)
 }
+
+export const generateMockTest = async (payload) => {
+  const result = await axios.post(serverUrl + "/api/mock-tests/generate", payload, {
+    withCredentials: true,
+  })
+  return result.data
+}
+
+export const getMockTest = async (testId) => {
+  const result = await axios.get(serverUrl + `/api/mock-tests/${testId}`, {
+    withCredentials: true,
+  })
+  return result.data
+}
+
+export const startMockTest = async (testId) => {
+  const result = await axios.post(
+    serverUrl + `/api/mock-tests/${testId}/start`,
+    {},
+    { withCredentials: true }
+  )
+  return result.data
+}
+
+export const submitMockTest = async (testId, payload) => {
+  const result = await axios.post(
+    serverUrl + `/api/mock-tests/${testId}/submit`,
+    payload,
+    { withCredentials: true }
+  )
+  return result.data
+}
+
+export const listMockTests = async () => {
+  const result = await axios.get(serverUrl + "/api/mock-tests", { withCredentials: true })
+  return result.data
+}

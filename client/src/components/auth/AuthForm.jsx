@@ -23,8 +23,8 @@ export function AuthDivider() {
       <div className="absolute inset-0 flex items-center">
         <div className="w-full border-t border-[var(--color-border)]" />
       </div>
-      <div className="relative flex justify-center text-xs">
-        <span className="px-3 bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+      <div className="relative flex justify-center">
+        <span className="px-3 bg-[var(--color-surface-muted)] type-caption">
           or continue with email
         </span>
       </div>
@@ -35,18 +35,16 @@ export function AuthDivider() {
 export function AuthError({ message }) {
   if (!message) return null
   return (
-    <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+    <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 type-sm text-error">
       {message}
     </div>
   )
 }
 
-export function AuthInput({ label, type = "text", value, onChange, placeholder, autoComplete }) {
+export function AuthInput({ label, type = "text", value, onChange, placeholder, autoComplete, hint }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1.5">
-        {label}
-      </label>
+    <div className="ui-field">
+      <label className="ui-label">{label}</label>
       <input
         type={type}
         value={value}
@@ -54,8 +52,9 @@ export function AuthInput({ label, type = "text", value, onChange, placeholder, 
         placeholder={placeholder}
         autoComplete={autoComplete}
         required
-        className="w-full px-4 py-3 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500/50 transition-all"
+        className="ui-input bg-[var(--color-surface-elevated)]"
       />
+      {hint && <p className="ui-hint">{hint}</p>}
     </div>
   )
 }

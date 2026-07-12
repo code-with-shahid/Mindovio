@@ -36,10 +36,41 @@ IMPORTANCE:
 - subTopics MUST use exactly these three keys: "⭐", "⭐⭐", "⭐⭐⭐"
 - importance must be one of: "⭐", "⭐⭐", "⭐⭐⭐"
 
-DIAGRAMS:
-- If Include Diagram is YES: diagram.data MUST be a valid Mermaid string starting with graph TD (or flowchart TD). Node labels in quotes. No special chars that break Mermaid.
+DIAGRAMS (CRITICAL — VALID MERMAID ONLY):
+Whenever generating Mermaid diagrams, output ONLY valid Mermaid syntax. Do not include markdown, explanations, headings, code fences, bullet points, or any text before or after the diagram.
+
+ALLOWED diagram types ONLY (pick one per string):
+flowchart | graph | sequenceDiagram | classDiagram | stateDiagram-v2 | erDiagram | journey | mindmap | timeline | pie | gitGraph
+Reject / do not use any other type (no gantt, no C4, no quadrantChart).
+
+Preferred flowchart style (pure Mermaid, nothing else):
+
+flowchart TD
+A["Input"]
+B["Processing"]
+C["Output"]
+A --> B
+B --> C
+
+HARD RULES — NEVER include in mermaid strings:
+- Markdown fences (\`\`\` or \`\`\`mermaid)
+- HTML tags
+- Bullet lists or numbering
+- Headings, explanations, or prose before/after the diagram
+- JSON, comments (%%), or backticks
+- Special characters in flowchart labels: < > { } | ; #
+- Spaces in node IDs (use A, B, Step1)
+
+ALLOWED:
+- Node IDs: letters/numbers only (A, B1, CPU)
+- Flowchart labels ONLY inside quoted brackets: A["Short label"]
+- Edges: --> , --- , -.->
+- Keep diagrams small (max 8–12 nodes)
+
+- If Include Diagram is YES: diagram.data MUST be a non-empty valid Mermaid string of an allowed type.
 - If Include Diagram is NO: diagram.data may be "".
-- ALWAYS add 0–3 extra useful diagrams in "diagrams" when visuals help (flowchart, process, hierarchy, lifecycle, decision tree). Use Mermaid only.
+- diagrams[]: 0–3 extra valid Mermaid diagrams when visuals help; same pure-syntax rules.
+- If you cannot produce valid Mermaid, use "" / [] — never invent broken syntax.
 
 CHARTS:
 - If Include Charts is YES: charts MUST have at least one bar|line|pie chart with numeric values.

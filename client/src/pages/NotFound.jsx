@@ -3,14 +3,16 @@ import { motion } from "motion/react"
 import { HiHome, HiSparkles } from "react-icons/hi2"
 import BrandLogo from "../components/ui/BrandLogo"
 import Button from "../components/ui/Button"
+import AmbientBackground from "../components/landing/motion/AmbientBackground"
 import { BRAND_NAME } from "../constants/brand"
 
 export default function NotFound() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen mesh-bg flex flex-col">
-      <header className="px-6 py-5">
+    <div className="app-shell relative flex flex-col overflow-hidden">
+      <AmbientBackground variant="app" />
+      <header className="relative z-10 px-6 py-5">
         <BrandLogo showTagline />
       </header>
 

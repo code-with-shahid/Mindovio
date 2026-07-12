@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import { useSelector } from "react-redux"
-import { HiChevronDown, HiArrowRightOnRectangle, HiClock, HiSparkles } from "react-icons/hi2"
+import { HiChevronDown, HiArrowRightOnRectangle, HiClock, HiClipboardDocumentList, HiSparkles } from "react-icons/hi2"
 import { useAuth } from "../../context/AuthContext"
 import ThemeToggle from "../ui/ThemeToggle"
 import Button from "../ui/Button"
@@ -20,12 +20,12 @@ export function DashboardTopbar({ title, subtitle }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 glass-strong rounded-2xl px-5 py-4 mb-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-xl font-bold text-[var(--color-text-primary)] truncate">{title}</h1>
+    <header className="sticky top-0 z-30 glass-strong rounded-xl sm:rounded-2xl px-3 sm:px-5 py-3 sm:py-4 mb-4 sm:mb-6">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+        <div className="min-w-0 flex-1">
+          <h1 className="type-h2 truncate">{title}</h1>
           {subtitle && (
-            <p className="text-sm text-[var(--color-text-secondary)] mt-0.5 truncate">{subtitle}</p>
+            <p className="type-sm mt-0.5 line-clamp-2 sm:truncate">{subtitle}</p>
           )}
         </div>
 
@@ -39,8 +39,8 @@ export function DashboardTopbar({ title, subtitle }) {
             }`}
           >
             <HiSparkles className={credits < 10 ? "text-amber-500" : "text-brand-500"} />
-            <span className="text-sm font-semibold text-[var(--color-text-primary)]">{credits}</span>
-            <span className="hidden sm:inline text-xs text-[var(--color-text-muted)]">
+            <span className="text-sm font-medium text-primary tabular-nums">{credits}</span>
+            <span className="hidden sm:inline type-caption">
               {credits < 10 ? "low" : "credits"}
             </span>
           </button>
@@ -73,6 +73,7 @@ export function DashboardTopbar({ title, subtitle }) {
                       <p className="text-xs text-[var(--color-text-muted)] truncate">{userData?.email}</p>
                     </div>
                     <MenuItem icon={<HiClock />} label="History" onClick={() => { setMenuOpen(false); navigate("/history") }} />
+                    <MenuItem icon={<HiClipboardDocumentList />} label="Mock Tests" onClick={() => { setMenuOpen(false); navigate("/mock-tests") }} />
                     <MenuItem icon={<HiArrowRightOnRectangle />} label="Sign out" onClick={handleSignOut} danger />
                   </motion.div>
                 </>

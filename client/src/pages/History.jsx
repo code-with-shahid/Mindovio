@@ -71,8 +71,8 @@ export default function History() {
     <DashboardLayout>
       <DashboardTopbar title="Note History" subtitle="Browse and review your previously generated notes" />
 
-      <div className="grid lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1 space-y-4">
+      <div className="grid lg:grid-cols-4 gap-4 sm:gap-6 min-w-0">
+        <div className="lg:col-span-1 space-y-4 min-w-0">
           <Button
             variant="primary"
             className="w-full"
@@ -82,7 +82,7 @@ export default function History() {
             New Notes
           </Button>
 
-          <Card glass padding="p-4" className="max-h-[70vh] overflow-hidden flex flex-col">
+          <Card glass padding="p-3 sm:p-4" className="max-h-[40vh] lg:max-h-[70vh] overflow-hidden flex flex-col">
             <div className="relative mb-4">
               <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
@@ -90,7 +90,7 @@ export default function History() {
                 placeholder="Search topics…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                className="w-full pl-9 pr-3 py-2.5 ui-input"
               />
             </div>
 
@@ -142,8 +142,8 @@ export default function History() {
           </Card>
         </div>
 
-        <div className="lg:col-span-3">
-          <Card padding="p-0" className="min-h-[60vh] overflow-hidden">
+        <div className="lg:col-span-3 min-w-0">
+          <Card padding="p-0" className="min-h-[50vh] sm:min-h-[60vh] overflow-hidden min-w-0">
             <AnimatePresence mode="wait">
               {loading ? (
                 <motion.div
@@ -183,7 +183,7 @@ export default function History() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <FinalResult result={selectedNote} />
+                  <FinalResult result={selectedNote} noteId={activeNoteId} />
                 </motion.div>
               )}
             </AnimatePresence>

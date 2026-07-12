@@ -1,5 +1,7 @@
 import { motion } from "motion/react"
-import { HiStar } from "react-icons/hi2"
+import { Star } from "lucide-react"
+import BloomHeading from "./motion/BloomHeading"
+import { StaggerChildren, staggerItem } from "./motion/SectionReveal"
 
 const testimonials = [
   {
@@ -54,50 +56,39 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section id="testimonials" className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[var(--color-surface-elevated)]/50">
+    <section id="testimonials" className="section-gap-lg px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider mb-3">
-            Testimonials
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-primary)] mb-4">
-            Loved by students across India
-          </h2>
-          <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-            From board exams to competitive tests — see why thousands of students trust Mindovio.
-          </p>
-        </div>
+        <BloomHeading
+          eyebrow="Testimonials"
+          text="Loved by students across India"
+          subtitle="From board exams to competitive tests — see why thousands of students trust Mindovio."
+        />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {testimonials.map((t, i) => (
+        <StaggerChildren className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6" stagger={0.08}>
+          {testimonials.map((t) => (
             <motion.div
               key={t.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="glass rounded-2xl p-6 flex flex-col"
+              variants={staggerItem}
+              className="premium-card rounded-2xl p-6 flex flex-col group"
             >
-              <div className="flex gap-0.5 mb-4">
-                {Array.from({ length: t.rating }).map((_, j) => (
-                  <HiStar key={j} className="text-amber-400 text-sm" />
-                ))}
-              </div>
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed flex-1 mb-6">
-                "{t.quote}"
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[var(--color-border)]">
-                <div className="h-10 w-10 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#7C5CFF]/30 to-[#4F8BFF]/20 text-[#A855F7] flex items-center justify-center text-sm font-semibold border border-white/10">
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[var(--color-text-primary)]">{t.name}</p>
-                  <p className="text-xs text-[var(--color-text-muted)]">{t.role}</p>
+                  <p className="type-h4 text-[var(--color-text-primary)]">{t.name}</p>
+                  <p className="type-caption text-[var(--color-text-muted)]">{t.role}</p>
                 </div>
               </div>
+              <div className="flex gap-0.5 mb-3 text-amber-400">
+                {Array.from({ length: t.rating }).map((_, i) => (
+                  <Star key={i} size={14} fill="currentColor" />
+                ))}
+              </div>
+              <p className="type-sm leading-relaxed flex-1 text-[var(--color-text-secondary)]">“{t.quote}”</p>
             </motion.div>
           ))}
-        </div>
+        </StaggerChildren>
       </div>
     </section>
   )
