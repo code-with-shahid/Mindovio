@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { Sparkles } from "lucide-react"
 import BrandLogo from "../ui/BrandLogo"
-import { BRAND_NAME, BRAND_EMAIL } from "../../constants/brand"
+import { BRAND_NAME } from "../../constants/brand"
 import BloomHeading from "./motion/BloomHeading"
 import PremiumButton from "./motion/PremiumButton"
 import SectionReveal from "./motion/SectionReveal"
@@ -17,7 +17,7 @@ const footerLinks = {
   support: [
     { label: "FAQ", href: "#faq" },
     { label: "Testimonials", href: "#testimonials" },
-    { label: "Contact", href: `mailto:${BRAND_EMAIL}` },
+    { label: "Contact", href: "#contact" },
   ],
 }
 

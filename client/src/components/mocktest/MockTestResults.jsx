@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import {
@@ -27,7 +27,7 @@ import {
 } from "lucide-react"
 import Card from "../ui/Card"
 import Button from "../ui/Button"
-import { generateMockTest } from "../../services/api"
+import { generateMockTest, getMockTest } from "../../services/api"
 import { updateCredits } from "../../redux/userSlice"
 import { useToast } from "../../context/ToastContext"
 
@@ -50,13 +50,55 @@ export default function MockTestResults({ data, noteId }) {
   const dispatch = useDispatch()
   const { toast } = useToast()
   const [regenLoading, setRegenLoading] = useState(null)
+  const [feedback, setFeedback] = useState(data.feedback || {})
+  const [feedbackStatus, setFeedbackStatus] = useState(data.feedbackStatus || "ready")
   const score = data.score || {}
-  const feedback = data.feedback || {}
   const results = data.results || {}
   const radar = results.radar || []
   const perQuestion = results.perQuestion || []
   const badges = data.badges || []
   const resolvedNoteId = noteId || data.noteId
+  const testId = data.testId
+
+  useEffect(() => {
+    setFeedback(data.feedback || {})
+    setFeedbackStatus(data.feedbackStatus || "ready")
+  }, [data.feedback, data.feedbackStatus, data.testId])
+
+  // Poll for richer Gemini feedback after fast submit
+  useEffect(() => {
+    if (!testId || feedbackStatus !== "pending") return
+    let tries = 0
+    let cancelled = false
+    const tick = async () => {
+      tries += 1
+      try {
+        const fresh = await getMockTest(testId)
+        if (cancelled) return
+        if (fresh.feedbackStatus === "ready" && fresh.feedback) {
+          setFeedback(fresh.feedback)
+          setFeedbackStatus("ready")
+          return
+        }
+        if (fresh.feedbackStatus === "failed") {
+          setFeedbackStatus("failed")
+          return
+        }
+      } catch {
+        /* keep provisional feedback */
+      }
+      if (!cancelled && tries < 20) {
+        timer = setTimeout(tick, 2000)
+      } else if (!cancelled) {
+        setFeedbackStatus((s) => (s === "pending" ? "failed" : s))
+      }
+    }
+    let timer = setTimeout(tick, 1500)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [testId, feedbackStatus])
 
   const regenerate = async (mode) => {
     if (!resolvedNoteId) {
@@ -221,10 +263,24 @@ export default function MockTestResults({ data, noteId }) {
 
       {/* AI feedback */}
       <Card className="!p-6 space-y-4">
-        <h3 className="type-h3 flex items-center gap-2">
-          <Sparkles className="text-brand-500" size={20} /> AI feedback
-        </h3>
-        <p className="type-body text-[var(--color-text-secondary)]">{feedback.summary}</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="type-h3 flex items-center gap-2">
+            <Sparkles className="text-brand-500" size={20} /> AI feedback
+          </h3>
+          {feedbackStatus === "pending" && (
+            <span className="type-caption rounded-full bg-brand-500/10 px-3 py-1 text-brand-600 dark:text-brand-300 animate-pulse">
+              Refining personalized insights…
+            </span>
+          )}
+          {feedbackStatus === "ready" && (
+            <span className="type-caption rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-600 dark:text-emerald-400">
+              Personalized
+            </span>
+          )}
+        </div>
+        <p className="type-body text-[var(--color-text-secondary)]">
+          {feedback.summary || "Your score is ready. Insights will appear shortly."}
+        </p>
         <div className="grid sm:grid-cols-2 gap-4">
           <ListBlock title="Strengths" items={feedback.strengths} tone="success" />
           <ListBlock title="Weaknesses" items={feedback.weaknesses} tone="danger" />

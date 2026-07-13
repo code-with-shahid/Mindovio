@@ -688,6 +688,26 @@ main,
   }
 }
 
+/* Light theme: darker accents so gradient words stay readable on white */
+.light .gradient-text-safe,
+.light .gradient-text,
+.light .gradient-text-animated {
+  color: #5a3ad4;
+  -webkit-text-fill-color: #5a3ad4;
+  animation: accent-shift-light 5s ease-in-out infinite;
+}
+
+@keyframes accent-shift-light {
+  0%, 100% {
+    color: #5a3ad4;
+    -webkit-text-fill-color: #5a3ad4;
+  }
+  50% {
+    color: #2563eb;
+    -webkit-text-fill-color: #2563eb;
+  }
+}
+
 .mesh-bg {
   background-color: var(--color-surface-muted);
   background-image:
@@ -1382,8 +1402,74 @@ main,
 .light .premium-card {
   background:
     radial-gradient(120% 80% at 10% 0%, rgba(124, 92, 255, 0.06), transparent 45%),
-    color-mix(in srgb, var(--color-surface-elevated) 92%, transparent);
+    var(--color-surface-elevated);
   border: 1px solid var(--color-border);
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.06);
+}
+
+/* Contact panels — solid surfaces so form + cards read in both themes */
+.contact-panel {
+  background: rgba(14, 21, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+}
+
+.light .contact-panel {
+  background: #ffffff;
+  border: 1px solid #dbe3f0;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.07);
+}
+
+.contact-panel .ui-input {
+  background: rgba(7, 11, 22, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.light .contact-panel .ui-input {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0b1220;
+}
+
+.contact-panel .ui-input::placeholder {
+  color: #7d8797;
+}
+
+.light .contact-panel .ui-input::placeholder {
+  color: #64748b;
+}
+
+.contact-chip {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: #b7c1d1;
+}
+
+.contact-chip:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.contact-chip.is-active {
+  border-color: rgba(124, 92, 255, 0.55);
+  background: rgba(124, 92, 255, 0.16);
+  color: #c4b5fd;
+}
+
+.light .contact-chip {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.light .contact-chip:hover {
+  background: #f8fafc;
+}
+
+.light .contact-chip.is-active {
+  border-color: #7c5cff;
+  background: #f4f1ff;
+  color: #5a3ad4;
 }
 
 .premium-card::before {

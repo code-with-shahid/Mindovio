@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Demo", href: "#demo" },
   { label: "Testimonials", href: "#testimonials" },
   { label: "FAQ", href: "#faq" },
+  { label: "Contact", href: "#contact" },
 ]
 
 export default function LandingNavbar() {

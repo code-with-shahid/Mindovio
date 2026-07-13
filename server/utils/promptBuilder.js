@@ -4,136 +4,66 @@ export const buildPrompt = ({
   examType,
   revisionMode,
   includeDiagram,
-  includeChart
+  includeChart,
 }) => {
   return `
-You are an experienced educator and STRICT JSON generator for Mindovio, an exam-prep study platform.
-
-CRITICAL OUTPUT RULES:
-- Output MUST be valid JSON only (no markdown fences, no commentary)
-- Use ONLY double quotes
-- No trailing commas, no comments
-- Escape newlines inside strings as \\n
-- Do NOT use emojis inside string values (except the exact star keys in subTopics / importance)
-- Your response will be parsed with JSON.parse()
+You are a fast exam coach for Mindovio. Return ONLY valid JSON (no markdown fences).
 
 INPUT:
 Topic: ${topic}
-Class Level: ${classLevel || "Not specified"}
+Class Level: ${classLevel || "General"}
 Exam Type: ${examType || "General"}
-Revision Mode: ${revisionMode ? "ON" : "OFF"}
-Include Diagram: ${includeDiagram ? "YES" : "NO"}
-Include Charts: ${includeChart ? "YES" : "NO"}
+Revision Mode: ${revisionMode ? "ON (ultra short bullets)" : "OFF (concise exam notes)"}
+Diagram: ${includeDiagram ? "YES — one small valid Mermaid flowchart" : "NO — diagram.data empty"}
+Charts: ${includeChart ? "YES — one small chart" : "NO — charts []"}
 
-ROLE:
-Write like a senior teacher preparing students for exams. Be clear, structured, exam-focused, and student-friendly. Prefer important concepts first. Use analogies and memory tricks. Avoid repetition and fluff.
+SPEED + QUALITY RULES:
+- Be concise. Prefer clarity over length.
+- notes markdown: max ~450 words, ## headings, bullets, key formulas only
+- Avoid fluff, repetition, and long paragraphs
+- Complete the FULL JSON quickly; shorter fields are better than truncated JSON
 
-REVISION MODE:
-- If ON: notes and revisionPoints must be ultra-short cheat-sheet style (bullets, keywords, formulas only). Still return compact premium arrays (objectives, takeaways, flashcards, MCQs).
-- If OFF: detailed exam-oriented explanations with examples, steps, and clarity.
+COUNTS (do not exceed):
+- learningObjectives: 4
+- tableOfContents: 5
+- definitions: 6
+- coreConcepts: 4 (short explanation + 1 example each)
+- callouts: 2
+- formulas: 0–4
+- tables: 0–1
+- commonMistakes / tipsAndTricks / mnemonics / examInsights / importantPoints / keyTakeaways / revisionPoints: 4–6 each
+- flashcards: 6
+- faqs: 3
+- questions.short: 5
+- questions.long: 3
+- questions.mcqs: 8 ({q, options[4], answer, explanation})
+- questions.viva: 3
+- questions.interview: 3
+- diagrams: 0–1 extra only if useful
+- codeBlocks / illustrations: [] unless clearly needed
 
-IMPORTANCE:
-- subTopics MUST use exactly these three keys: "⭐", "⭐⭐", "⭐⭐⭐"
-- importance must be one of: "⭐", "⭐⭐", "⭐⭐⭐"
+Mermaid rules (if diagram YES): pure Mermaid only, max 8 nodes, labels in A["Label"], no markdown fences.
 
-DIAGRAMS (CRITICAL — VALID MERMAID ONLY):
-Whenever generating Mermaid diagrams, output ONLY valid Mermaid syntax. Do not include markdown, explanations, headings, code fences, bullet points, or any text before or after the diagram.
+subTopics keys MUST be exactly "⭐", "⭐⭐", "⭐⭐⭐" (2–4 items each).
+importance one of "⭐"|"⭐⭐"|"⭐⭐⭐".
 
-ALLOWED diagram types ONLY (pick one per string):
-flowchart | graph | sequenceDiagram | classDiagram | stateDiagram-v2 | erDiagram | journey | mindmap | timeline | pie | gitGraph
-Reject / do not use any other type (no gantt, no C4, no quadrantChart).
-
-Preferred flowchart style (pure Mermaid, nothing else):
-
-flowchart TD
-A["Input"]
-B["Processing"]
-C["Output"]
-A --> B
-B --> C
-
-HARD RULES — NEVER include in mermaid strings:
-- Markdown fences (\`\`\` or \`\`\`mermaid)
-- HTML tags
-- Bullet lists or numbering
-- Headings, explanations, or prose before/after the diagram
-- JSON, comments (%%), or backticks
-- Special characters in flowchart labels: < > { } | ; #
-- Spaces in node IDs (use A, B, Step1)
-
-ALLOWED:
-- Node IDs: letters/numbers only (A, B1, CPU)
-- Flowchart labels ONLY inside quoted brackets: A["Short label"]
-- Edges: --> , --- , -.->
-- Keep diagrams small (max 8–12 nodes)
-
-- If Include Diagram is YES: diagram.data MUST be a non-empty valid Mermaid string of an allowed type.
-- If Include Diagram is NO: diagram.data may be "".
-- diagrams[]: 0–3 extra valid Mermaid diagrams when visuals help; same pure-syntax rules.
-- If you cannot produce valid Mermaid, use "" / [] — never invent broken syntax.
-
-CHARTS:
-- If Include Charts is YES: charts MUST have at least one bar|line|pie chart with numeric values.
-- If Include Charts is NO: charts MUST be [].
-- Chart item: { "type": "bar"|"line"|"pie", "title": string, "data": [{ "name": string, "value": number }] }
-
-EXAM BANK (REQUIRED COUNTS):
-- questions.short: exactly 10 strings
-- questions.long: exactly 5 strings
-- questions.mcqs: exactly 20 objects { "q", "options": [4 strings], "answer": exact option text, "explanation" }
-- questions.viva: at least 5 strings
-- questions.interview: at least 5 strings
-- questions.diagram: one string (diagram-based question) or ""
-
-ILLUSTRATIONS:
-- illustrations[].category MUST be one of: architecture|network|anatomy|cloud|database|os|ml|cpu|generic
-- Only include when an educational visual would help understanding (not decorative)
-
-CODE:
-- If topic involves programming, fill codeBlocks; otherwise use [].
-
-FORMULAS:
-- Put LaTeX in formulas[].latex WITHOUT surrounding $ delimiters (e.g. "E = mc^2" or "\\\\frac{a}{b}")
-
-notes FIELD:
-- Full markdown study body with headings, lists, and ## sections covering core explanations.
-- May include $inline$ and $$block$$ math for KaTeX.
-
-STRICT JSON SHAPE (all keys required; use [] or "" when not applicable):
-
+JSON SHAPE:
 {
   "title": "string",
-  "overview": "string",
+  "overview": "2-3 sentences",
   "learningObjectives": ["string"],
   "tableOfContents": ["string"],
-  "estimatedMinutes": 12,
-  "subTopics": {
-    "⭐": ["string"],
-    "⭐⭐": ["string"],
-    "⭐⭐⭐": ["string"]
-  },
+  "estimatedMinutes": 8,
+  "subTopics": { "⭐": [], "⭐⭐": [], "⭐⭐⭐": [] },
   "importance": "⭐⭐",
   "notes": "markdown string",
   "definitions": [{ "term": "string", "definition": "string" }],
-  "coreConcepts": [{
-    "title": "string",
-    "explanation": "string",
-    "example": "string",
-    "steps": ["string"]
-  }],
-  "callouts": [{
-    "type": "tip|warning|info|success|important",
-    "title": "string",
-    "content": "string"
-  }],
+  "coreConcepts": [{ "title": "string", "explanation": "string", "example": "string", "steps": ["string"] }],
+  "callouts": [{ "type": "tip|warning|info|important", "title": "string", "content": "string" }],
   "formulas": [{ "name": "string", "latex": "string", "explanation": "string" }],
-  "tables": [{
-    "title": "string",
-    "headers": ["string"],
-    "rows": [["string"]]
-  }],
+  "tables": [{ "title": "string", "headers": ["string"], "rows": [["string"]] }],
   "diagram": { "type": "flowchart", "data": "" },
-  "diagrams": [{ "title": "string", "mermaid": "string" }],
+  "diagrams": [],
   "charts": [],
   "commonMistakes": ["string"],
   "tipsAndTricks": ["string"],
@@ -145,31 +75,18 @@ STRICT JSON SHAPE (all keys required; use [] or "" when not applicable):
   "importantPoints": ["string"],
   "revisionPoints": ["string"],
   "flashcards": [{ "front": "string", "back": "string" }],
-  "codeBlocks": [{
-    "language": "javascript",
-    "code": "string",
-    "explanation": "string",
-    "output": "string",
-    "bestPractices": ["string"],
-    "complexity": "string",
-    "mistakes": ["string"]
-  }],
-  "illustrations": [{ "category": "generic", "caption": "string" }],
+  "codeBlocks": [],
+  "illustrations": [],
   "questions": {
     "short": ["string"],
     "long": ["string"],
     "diagram": "",
-    "mcqs": [{
-      "q": "string",
-      "options": ["A", "B", "C", "D"],
-      "answer": "A",
-      "explanation": "string"
-    }],
+    "mcqs": [{ "q": "string", "options": ["A","B","C","D"], "answer": "A", "explanation": "string" }],
     "viva": ["string"],
     "interview": ["string"]
   }
 }
 
 RETURN ONLY VALID JSON.
-`;
-};
+`.trim()
+}

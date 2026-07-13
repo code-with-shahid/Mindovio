@@ -78,6 +78,11 @@ const mockTestSchema = new mongoose.Schema(
     },
     results: { type: mongoose.Schema.Types.Mixed },
     feedback: { type: mongoose.Schema.Types.Mixed },
+    feedbackStatus: {
+      type: String,
+      enum: ["pending", "ready", "failed"],
+      default: "ready",
+    },
     badges: { type: [String], default: [] },
   },
   { timestamps: true }

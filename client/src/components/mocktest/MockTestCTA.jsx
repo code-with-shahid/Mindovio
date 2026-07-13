@@ -50,7 +50,7 @@ export function MockTestCTA({ noteId, topic }) {
           </Button>
         </div>
         <p className="relative mt-4 type-caption text-[var(--color-text-muted)]">
-          Costs 5 credits · Questions are generated fresh from your notes each time
+          Costs 5 credits · Usually ready in under a minute
         </p>
       </motion.section>
 
@@ -87,6 +87,9 @@ function MockTestSetupModal({ noteId, topic, onClose }) {
         dispatch(updateCredits(data.creditsLeft))
       }
       toast("Mock test ready — good luck!", "success")
+      if (data.usedFallback) {
+        toast("Some questions used a notes backup because AI was incomplete", "info")
+      }
       onClose()
       navigate(`/mock-test/${data.testId}`)
     } catch (error) {

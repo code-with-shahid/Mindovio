@@ -184,7 +184,7 @@ export default function TopicForm({ setResult, setLoading, loading, setError, se
             <span>{progress}%</span>
           </div>
           <p className="text-xs text-[var(--color-text-muted)] text-center">
-            This may take 1–3 minutes. Please keep this page open.
+            This usually takes under a minute. Keep this page open.
           </p>
         </div>
       )}

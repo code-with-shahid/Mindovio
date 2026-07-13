@@ -20,6 +20,7 @@ import LandingNavbar from "../components/landing/LandingNavbar"
 import DemoPreviewSection from "../components/landing/DemoPreviewSection"
 import TestimonialsSection from "../components/landing/TestimonialsSection"
 import FAQSection from "../components/landing/FAQSection"
+import ContactSection from "../components/landing/ContactSection"
 import LandingFooter from "../components/landing/LandingFooter"
 import FeatureCard from "../components/ui/FeatureCard"
 import { BRAND_NAME, BRAND_TAGLINE } from "../constants/brand"
@@ -248,6 +249,7 @@ export default function Home() {
       <DemoPreviewSection />
       <TestimonialsSection />
       <FAQSection />
+      <ContactSection />
       <LandingFooter />
     </div>
   )
