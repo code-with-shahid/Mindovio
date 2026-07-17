@@ -22,6 +22,7 @@ import {
   RefreshCw,
   Sparkles,
   Target,
+  Timer,
   TrendingUp,
   Zap,
 } from "lucide-react"
@@ -56,6 +57,7 @@ export default function MockTestResults({ data, noteId }) {
   const results = data.results || {}
   const radar = results.radar || []
   const perQuestion = results.perQuestion || []
+  const timeAnalytics = results.timeAnalytics || null
   const badges = data.badges || []
   const resolvedNoteId = noteId || data.noteId
   const testId = data.testId
@@ -205,6 +207,39 @@ export default function MockTestResults({ data, noteId }) {
           ))}
         </div>
       </Card>
+
+      {/* Time analytics */}
+      {timeAnalytics && (
+        <Card className="!p-5 sm:!p-6">
+          <h3 className="type-h4 mb-4 flex items-center gap-2">
+            <Timer size={18} className="text-brand-500" /> Time analytics
+          </h3>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-[var(--color-border)] p-4">
+              <p className="type-caption mb-1">Average per question</p>
+              <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+                {timeAnalytics.avgSecPerQuestion}s
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4">
+              <p className="type-caption mb-1 text-emerald-600 dark:text-emerald-400">
+                Fastest answer · {timeAnalytics.fastest.sec}s
+              </p>
+              <p className="type-sm text-[var(--color-text-secondary)] line-clamp-2">
+                {timeAnalytics.fastest.prompt}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-4">
+              <p className="type-caption mb-1 text-amber-600 dark:text-amber-400">
+                Slowest answer · {timeAnalytics.slowest.sec}s
+              </p>
+              <p className="type-sm text-[var(--color-text-secondary)] line-clamp-2">
+                {timeAnalytics.slowest.prompt}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-4 sm:gap-5 min-w-0">
@@ -362,16 +397,33 @@ export default function MockTestResults({ data, noteId }) {
                 >
                   {q.status}
                 </span>
-                <span className="type-sm font-medium text-[var(--color-text-primary)]">
+                <span className="type-sm font-medium text-[var(--color-text-primary)] flex-1">
                   {i + 1}. {q.prompt}
                 </span>
+                {typeof q.timeSpentSec === "number" && (
+                  <span className="mt-0.5 shrink-0 type-caption text-[var(--color-text-muted)] tabular-nums">
+                    {q.timeSpentSec}s
+                  </span>
+                )}
               </summary>
               <div className="px-4 pb-4 space-y-2 type-sm text-[var(--color-text-secondary)] border-t border-[var(--color-border)] pt-3">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 type-caption text-[var(--color-text-muted)]">
+                  {q.difficulty && <span className="capitalize">Difficulty: {q.difficulty}</span>}
+                  {typeof q.timeSpentSec === "number" && <span>Time taken: {q.timeSpentSec}s</span>}
+                </div>
                 <p>
                   <strong className="text-[var(--color-text-primary)]">Correct:</strong>{" "}
                   {typeof q.correctAnswer === "object"
                     ? JSON.stringify(q.correctAnswer)
                     : String(q.correctAnswer)}
+                </p>
+                <p>
+                  <strong className="text-[var(--color-text-primary)]">Your answer:</strong>{" "}
+                  {q.given == null || q.given === ""
+                    ? "— (skipped)"
+                    : typeof q.given === "object"
+                      ? JSON.stringify(q.given)
+                      : String(q.given)}
                 </p>
                 <p>{q.explanation?.whyCorrect}</p>
                 {(q.explanation?.whyWrong || []).length > 0 && (

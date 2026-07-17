@@ -53,6 +53,7 @@ export function AuthProvider({ children }) {
       dispatch(setUserData(user))
       return { success: true }
     } catch (error) {
+      console.error("Login failed:", error.code || error.message, error)
       return { success: false, error: getFirebaseErrorMessage(error.code) }
     }
   }, [dispatch])
@@ -63,6 +64,7 @@ export function AuthProvider({ children }) {
       dispatch(setUserData(user))
       return { success: true }
     } catch (error) {
+      console.error("Signup failed:", error.code || error.message, error)
       return { success: false, error: getFirebaseErrorMessage(error.code) }
     }
   }, [dispatch])

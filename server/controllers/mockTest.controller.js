@@ -338,7 +338,8 @@ export const generateMockTest = async (req, res) => {
     // Ensure stable ids q1..qn
     questions = questions.slice(0, count).map((q, i) => ({ ...q, id: `q${i + 1}` }))
 
-    const timeLimitSec = questions.length * 90
+    // Exactly 1 minute per question — real exam pacing
+    const timeLimitSec = questions.length * 60
 
     let mock
     try {
@@ -461,7 +462,7 @@ export const getMockTest = async (req, res) => {
 /** POST /api/mock-tests/:id/submit */
 export const submitMockTest = async (req, res) => {
   try {
-    const { answers = {}, flagged = [], timeTakenSec } = req.body
+    const { answers = {}, flagged = [], timeTakenSec, questionTimes = {} } = req.body
     const mock = await MockTest.findOne({ _id: req.params.id, user: req.userId })
     if (!mock) return res.status(404).json({ message: "Test not found" })
     if (mock.status === "submitted") {
@@ -481,6 +482,11 @@ export const submitMockTest = async (req, res) => {
         given === "" ||
         (typeof given === "object" && !Object.keys(given).length)
 
+      const timeSpentSec =
+        typeof questionTimes[q.id] === "number"
+          ? Math.max(0, Math.min(60, Math.round(questionTimes[q.id])))
+          : null
+
       if (empty) {
         skipped += 1
         perQuestion.push({
@@ -492,6 +498,8 @@ export const submitMockTest = async (req, res) => {
           topicTag: q.topicTag,
           type: q.type,
           prompt: q.prompt,
+          difficulty: q.difficulty,
+          timeSpentSec,
         })
         continue
       }
@@ -508,6 +516,8 @@ export const submitMockTest = async (req, res) => {
           topicTag: q.topicTag,
           type: q.type,
           prompt: q.prompt,
+          difficulty: q.difficulty,
+          timeSpentSec,
         })
       } else {
         wrong += 1
@@ -521,6 +531,8 @@ export const submitMockTest = async (req, res) => {
           topicTag: q.topicTag,
           type: q.type,
           prompt: q.prompt,
+          difficulty: q.difficulty,
+          timeSpentSec,
         })
       }
     }
@@ -568,6 +580,22 @@ export const submitMockTest = async (req, res) => {
       score: v.total ? Math.round((v.correct / v.total) * 100) : 0,
     }))
 
+    // Time analytics from per-question timings (attempted questions only)
+    const timedRows = perQuestion.filter(
+      (r) => typeof r.timeSpentSec === "number" && r.status !== "skipped"
+    )
+    let timeAnalytics = null
+    if (timedRows.length) {
+      const totalSpent = timedRows.reduce((sum, r) => sum + r.timeSpentSec, 0)
+      const fastest = timedRows.reduce((a, b) => (b.timeSpentSec < a.timeSpentSec ? b : a))
+      const slowest = timedRows.reduce((a, b) => (b.timeSpentSec > a.timeSpentSec ? b : a))
+      timeAnalytics = {
+        avgSecPerQuestion: Math.round(totalSpent / timedRows.length),
+        fastest: { id: fastest.id, prompt: fastest.prompt, sec: fastest.timeSpentSec },
+        slowest: { id: slowest.id, prompt: slowest.prompt, sec: slowest.timeSpentSec },
+      }
+    }
+
     const badges = computeBadges({
       percentage,
       timeTakenSec: taken,
@@ -590,7 +618,7 @@ export const submitMockTest = async (req, res) => {
     mock.submittedAt = new Date()
     mock.timeTakenSec = taken
     mock.score = score
-    mock.results = { perQuestion, typeBreakdown, topicBreakdown, radar }
+    mock.results = { perQuestion, typeBreakdown, topicBreakdown, radar, timeAnalytics }
     mock.feedback = feedback
     mock.feedbackStatus = "pending"
     mock.badges = badges

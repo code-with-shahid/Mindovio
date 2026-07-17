@@ -68,6 +68,11 @@ export function getFirebaseErrorMessage(code) {
     "auth/too-many-requests": "Too many attempts. Please try again later.",
     "auth/popup-closed-by-user": "Sign-in popup was closed.",
     "auth/network-request-failed": "Network error. Check your connection.",
+    "auth/operation-not-allowed":
+      "Email/password sign-in is disabled for this project. Use Google sign-in, or enable Email/Password in the Firebase console.",
+    "auth/user-disabled": "This account has been disabled.",
+    "auth/invalid-api-key": "Firebase API key is invalid. Check the client configuration.",
+    "auth/missing-password": "Please enter your password.",
   }
   return messages[code] || "Authentication failed. Please try again."
 }

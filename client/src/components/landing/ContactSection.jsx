@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { motion } from "motion/react"
+import emailjs from "@emailjs/browser"
 import {
   Bug,
   Clock,
@@ -11,7 +12,13 @@ import {
 import BloomHeading from "./motion/BloomHeading"
 import SectionReveal from "./motion/SectionReveal"
 import PremiumButton from "./motion/PremiumButton"
-import { BRAND_EMAIL, BRAND_NAME } from "../../constants/brand"
+import {
+  BRAND_EMAIL,
+  BRAND_NAME,
+  EMAILJS_PUBLIC_KEY,
+  EMAILJS_SERVICE_ID,
+  EMAILJS_TEMPLATE_ID,
+} from "../../constants/brand"
 import { useToast } from "../../context/ToastContext"
 
 const SUBJECTS = [
@@ -57,21 +64,52 @@ export default function ContactSection() {
   const [email, setEmail] = useState("")
   const [subject, setSubject] = useState("support")
   const [message, setMessage] = useState("")
+  const [sending, setSending] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if (sending) return
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast("Please fill in name, email, and message", "error")
       return
     }
 
     const subjectLabel = SUBJECTS.find((s) => s.id === subject)?.label || "Support"
-    const mailSubject = encodeURIComponent(`[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`)
-    const mailBody = encodeURIComponent(
-      `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subjectLabel}\n\n${message.trim()}`
-    )
-    window.location.href = `mailto:${BRAND_EMAIL}?subject=${mailSubject}&body=${mailBody}`
-    toast("Opening your email app…", "success")
+    setSending(true)
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: name.trim(),
+          email: email.trim(),
+          from_name: name.trim(),
+          from_email: email.trim(),
+          reply_to: email.trim(),
+          subject: `[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`,
+          subject_type: subjectLabel,
+          message: message.trim(),
+          to_email: BRAND_EMAIL,
+        },
+        { publicKey: EMAILJS_PUBLIC_KEY }
+      )
+      toast("Message sent! We’ll get back to you soon.", "success")
+      setName("")
+      setEmail("")
+      setSubject("support")
+      setMessage("")
+    } catch (err) {
+      console.error("EmailJS send failed:", err)
+      // Fallback: open the user's email app so the message still reaches us
+      const mailSubject = encodeURIComponent(`[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`)
+      const mailBody = encodeURIComponent(
+        `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subjectLabel}\n\n${message.trim()}`
+      )
+      window.location.href = `mailto:${BRAND_EMAIL}?subject=${mailSubject}&body=${mailBody}`
+      toast("Direct send failed — opening your email app instead", "info")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -203,11 +241,17 @@ export default function ContactSection() {
                 />
               </label>
 
-              <PremiumButton type="submit" size="lg" className="w-full" icon={<Send size={16} />}>
-                Send Message
+              <PremiumButton
+                type="submit"
+                size="lg"
+                className="w-full"
+                disabled={sending}
+                icon={<Send size={16} />}
+              >
+                {sending ? "Sending…" : "Send Message"}
               </PremiumButton>
               <p className="type-caption text-center text-[var(--color-text-muted)]">
-                Opens your email app to message{" "}
+                Your message goes straight to{" "}
                 <span className="text-[var(--color-text-secondary)]">{BRAND_EMAIL}</span>
               </p>
             </form>

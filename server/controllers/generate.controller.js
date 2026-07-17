@@ -78,7 +78,7 @@ export const generateNotes = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-    res.status(500).json({
+    res.status(error.status || 500).json({
       error: "AI generation failed",
       message: error.message
     });

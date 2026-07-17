@@ -13,6 +13,7 @@ export default function PremiumButton({
   iconPosition = "right",
   className = "",
   type = "button",
+  disabled = false,
 }) {
   const reduced = usePrefersReducedMotion()
 
@@ -43,11 +44,13 @@ export default function PremiumButton({
     <motion.button
       type={type}
       onClick={onClick}
-      whileHover={reduced ? undefined : { scale: 1.05 }}
-      whileTap={reduced ? undefined : { scale: 0.97 }}
+      disabled={disabled}
+      whileHover={reduced || disabled ? undefined : { scale: 1.05 }}
+      whileTap={reduced || disabled ? undefined : { scale: 0.97 }}
       className={`
         group relative inline-flex items-center justify-center gap-2 overflow-hidden
         font-semibold tracking-[-0.01em] transition-shadow duration-300
+        disabled:opacity-60 disabled:cursor-not-allowed
         ${sizes[size]} ${variants[variant]} ${className}
       `}
     >

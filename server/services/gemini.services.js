@@ -3,6 +3,14 @@ import { normalizeStudyGuide } from "../utils/normalizeStudyGuide.js"
 const DEFAULT_MODEL =
   process.env.GEMINI_MODEL || "gemini-3-flash-preview"
 
+// Stable model used when the primary (often a preview) is overloaded
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash"
+
+const isOverloaded = (err) =>
+  err?.status === 503 ||
+  err?.status === 429 ||
+  /high demand|overloaded|try again later|resource.?exhausted/i.test(err?.message || "")
+
 const Gemini_URL = (model) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
 
@@ -142,31 +150,38 @@ async function callGemini(prompt, { generationConfig, model } = {}) {
 
 /** Study-guide notes — lean tokens + JSON mime for faster generation. */
 export const generateGeminiResponse = async (prompt) => {
-  try {
-    const parsed = await callGemini(prompt, {
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.45,
-        maxOutputTokens: 4600,
-      },
-    })
-    return normalizeStudyGuide(parsed)
-  } catch (error) {
-    // One fast fallback without mime if JSON mode fails
+  const config = { temperature: 0.45, maxOutputTokens: 4600 }
+  const plans = [
+    { model: DEFAULT_MODEL, generationConfig: { ...config, responseMimeType: "application/json" } },
+    { model: DEFAULT_MODEL, generationConfig: { ...config } },
+    { model: FALLBACK_MODEL, generationConfig: { ...config, responseMimeType: "application/json" } },
+    { model: FALLBACK_MODEL, generationConfig: { ...config } },
+  ]
+
+  let lastError = null
+  let skipModel = null
+  for (const plan of plans) {
+    if (plan.model === skipModel) continue
     try {
-      console.warn("Notes JSON mime failed, retrying plain:", error.message)
-      const parsed = await callGemini(prompt, {
-        generationConfig: {
-          temperature: 0.45,
-          maxOutputTokens: 4600,
-        },
-      })
+      const parsed = await callGemini(prompt, plan)
       return normalizeStudyGuide(parsed)
-    } catch (err2) {
-      console.error("Gemini Fetch Error:", err2.message)
-      throw new Error("Gemini API fetch failed")
+    } catch (error) {
+      lastError = error
+      console.warn(`Notes attempt failed (${plan.model}):`, error.message)
+      // Overloaded model won't recover in seconds — jump to the fallback model
+      if (isOverloaded(error)) skipModel = plan.model
     }
   }
+
+  console.error("Gemini Fetch Error:", lastError?.message)
+  const overloaded = isOverloaded(lastError)
+  const err = new Error(
+    overloaded
+      ? "The AI model is experiencing high demand right now. Please try again in a minute."
+      : "Gemini API fetch failed"
+  )
+  err.status = overloaded ? 503 : 500
+  throw err
 }
 
 /** Mock tests / feedback — compact token budgets. */

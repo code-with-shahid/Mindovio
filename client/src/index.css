@@ -1579,6 +1579,59 @@ main,
   height: 4px;
 }
 
+/* ─── Exam timer glows ─── */
+.timer-chip {
+  transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.timer-glow-yellow {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #d97706 !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+}
+
+.dark .timer-glow-yellow {
+  color: #fbbf24 !important;
+}
+
+.timer-glow-orange {
+  background: rgba(249, 115, 22, 0.16) !important;
+  color: #ea580c !important;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.55);
+}
+
+.dark .timer-glow-orange {
+  color: #fb923c !important;
+}
+
+.timer-glow-red {
+  background: rgba(244, 63, 94, 0.16) !important;
+  color: #e11d48 !important;
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.6);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.dark .timer-glow-red {
+  color: #fb7185 !important;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(244, 63, 94, 0.75);
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timer-glow-red {
+    animation: none;
+  }
+}
+
 .hero-cursor {
   display: inline-block;
   width: 2px;
