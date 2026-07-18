@@ -68,7 +68,7 @@ const faqs = [
   },
   {
     q: "How many credits do I get for free?",
-    a: "Every new user receives 50 free credits upon signing up with Google. Each note generation costs 10 credits, so you can create up to 5 full note sets before needing to purchase more.",
+    a: "Every new user receives 100 free credits upon signing up. Each note generation costs 10 credits (up to 10 full note sets). Mock tests are free and optional — they don’t use credits.",
   },
   {
     q: "Which exams and subjects are supported?",

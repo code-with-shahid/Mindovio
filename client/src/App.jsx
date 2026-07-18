@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
@@ -13,6 +14,8 @@ import MockTestHistory from "./pages/MockTestHistory"
 import ProtectedRoute, { GuestRoute } from "./components/layout/ProtectedRoute"
 import { useAuth } from "./context/AuthContext"
 import { PageLoader } from "./components/ui/Spinner"
+
+const AdminApp = lazy(() => import("./admin/AdminApp"))
 
 function App() {
   const { initializing } = useAuth()
@@ -35,6 +38,15 @@ function App() {
 
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
+
+      <Route
+        path="/admin/*"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <AdminApp />
+          </Suspense>
+        }
+      />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

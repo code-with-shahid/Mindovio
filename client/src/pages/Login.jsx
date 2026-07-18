@@ -86,7 +86,7 @@ export default function Login() {
         </p>
 
         <p className="text-center text-xs text-[var(--color-text-muted)] pt-2">
-          Start with 50 free credits · No card required
+          Start with 100 free credits · No card required
         </p>
       </Card>
     </AuthLayout>

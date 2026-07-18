@@ -9,6 +9,10 @@ import notesRouter from "./routes/genrate.route.js"
 import pdfRouter from "./routes/pdf.route.js"
 import creditRouter from "./routes/credits.route.js"
 import mockTestRouter from "./routes/mockTest.route.js"
+import adminRouter from "./routes/admin.route.js"
+import announcementRouter from "./routes/announcement.route.js"
+import feedbackRouter from "./routes/feedback.route.js"
+import notificationRouter from "./routes/notification.route.js"
 import { stripeWebhook } from "./controllers/credits.controller.js"
 dotenv.config()
 
@@ -26,7 +30,7 @@ app.post(
 app.use(cors(
     {origin:"http://localhost:5173",
         credentials:true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }
 ))
 
@@ -45,8 +49,10 @@ app.use("/api/notes", notesRouter)
 app.use("/api/pdf", pdfRouter)
 app.use("/api/credit",creditRouter)
 app.use("/api/mock-tests", mockTestRouter)
-
-
+app.use("/api/announcements", announcementRouter)
+app.use("/api/feedback", feedbackRouter)
+app.use("/api/notifications", notificationRouter)
+app.use("/api/admin", adminRouter)
 
 app.listen(PORT,()=>{
     console.log(`✅ Server running on port ${PORT}`)

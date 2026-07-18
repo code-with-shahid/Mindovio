@@ -68,3 +68,18 @@ export const listMockTests = async () => {
   const result = await axios.get(serverUrl + "/api/mock-tests", { withCredentials: true })
   return result.data
 }
+
+export const fetchPublishedAnnouncements = async () => {
+  const result = await axios.get(serverUrl + "/api/announcements")
+  return result.data
+}
+
+export const fetchPublishedNotifications = async () => {
+  const result = await axios.get(serverUrl + "/api/notifications")
+  return result.data
+}
+
+export const submitFeedback = async (payload) => {
+  const result = await axios.post(serverUrl + "/api/feedback", payload)
+  return result.data
+}

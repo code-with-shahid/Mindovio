@@ -14,7 +14,14 @@ const findOrCreateUser = async ({ name, email, firebaseUid }) => {
     let user = await UserModel.findOne({ email })
 
     if (!user) {
-        user = await UserModel.create({ name, email, firebaseUid })
+        // First-time signup — grant 100 free credits
+        user = await UserModel.create({
+            name,
+            email,
+            firebaseUid,
+            credits: 100,
+            isCreditAvailable: true,
+        })
         return user
     }
 

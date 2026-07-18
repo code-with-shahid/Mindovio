@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react"
 import { Home, FileText, Clock, CreditCard, ClipboardList, Menu, X } from "lucide-react"
 import BrandLogo from "../ui/BrandLogo"
 import AmbientBackground from "../landing/motion/AmbientBackground"
+import AnnouncementBanner from "../AnnouncementBanner"
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
@@ -138,6 +139,7 @@ export default function DashboardLayout({ children }) {
 
       <main className="relative z-10 lg:pl-56 xl:pl-64 min-h-screen min-w-0">
         <div className="px-3 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8 pt-[4.25rem] lg:pt-8 max-w-7xl 2xl:max-w-[90rem] mx-auto w-full min-w-0">
+          <AnnouncementBanner className="mb-5" includeNotifications limit={5} />
           {children}
         </div>
       </main>

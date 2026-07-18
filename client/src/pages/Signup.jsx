@@ -53,7 +53,7 @@ export default function Signup() {
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Get 50 free credits to start generating exam notes"
+      subtitle="Get 100 free credits to start generating exam notes"
     >
       <Card glass className="space-y-1">
         <AuthError message={error} />

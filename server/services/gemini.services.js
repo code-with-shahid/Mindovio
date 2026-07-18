@@ -1,15 +1,44 @@
 import { normalizeStudyGuide } from "../utils/normalizeStudyGuide.js"
 
-const DEFAULT_MODEL =
-  process.env.GEMINI_MODEL || "gemini-3-flash-preview"
+/**
+ * Model chain for production resilience.
+ * Google retires / overloads models often — never ship a single hard-coded model.
+ *
+ * Env (any one works):
+ *   GEMINI_MODELS=gemini-3.5-flash,gemini-2.0-flash,gemini-flash-latest
+ *   GEMINI_MODEL=... + GEMINI_FALLBACK_MODEL=...
+ */
+function resolveModelChain() {
+  const fromList = (process.env.GEMINI_MODELS || "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean)
 
-// Stable model used when the primary (often a preview) is overloaded
-const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash"
+  const primary = process.env.GEMINI_MODEL || "gemini-3.5-flash"
+  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.0-flash"
+  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-flash-latest"
 
-const isOverloaded = (err) =>
+  const chain = fromList.length ? fromList : [primary, fallback, tertiary]
+  return [...new Set(chain)]
+}
+
+const MODEL_CHAIN = resolveModelChain()
+const DEFAULT_MODEL = MODEL_CHAIN[0]
+
+const isTransientModelError = (err) =>
   err?.status === 503 ||
   err?.status === 429 ||
-  /high demand|overloaded|try again later|resource.?exhausted/i.test(err?.message || "")
+  /high demand|overloaded|try again later|resource.?exhausted|quota|rate limit/i.test(
+    err?.message || ""
+  )
+
+const isUnavailableModel = (err) =>
+  err?.status === 404 ||
+  /no longer available|not found|is not found|unsupported|invalid model/i.test(
+    err?.message || ""
+  )
+
+const shouldSkipModel = (err) => isTransientModelError(err) || isUnavailableModel(err)
 
 const Gemini_URL = (model) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
@@ -148,79 +177,90 @@ async function callGemini(prompt, { generationConfig, model } = {}) {
   return extractJsonObject(text)
 }
 
-/** Study-guide notes — lean tokens + JSON mime for faster generation. */
+/** Study-guide notes — walk the model chain until one succeeds. */
 export const generateGeminiResponse = async (prompt) => {
   const config = { temperature: 0.45, maxOutputTokens: 4600 }
-  const plans = [
-    { model: DEFAULT_MODEL, generationConfig: { ...config, responseMimeType: "application/json" } },
-    { model: DEFAULT_MODEL, generationConfig: { ...config } },
-    { model: FALLBACK_MODEL, generationConfig: { ...config, responseMimeType: "application/json" } },
-    { model: FALLBACK_MODEL, generationConfig: { ...config } },
-  ]
+  const plans = []
+  for (const model of MODEL_CHAIN) {
+    plans.push({
+      model,
+      generationConfig: { ...config, responseMimeType: "application/json" },
+    })
+    plans.push({ model, generationConfig: { ...config } })
+  }
 
   let lastError = null
-  let skipModel = null
+  const skipModels = new Set()
   for (const plan of plans) {
-    if (plan.model === skipModel) continue
+    if (skipModels.has(plan.model)) continue
     try {
       const parsed = await callGemini(prompt, plan)
       return normalizeStudyGuide(parsed)
     } catch (error) {
       lastError = error
       console.warn(`Notes attempt failed (${plan.model}):`, error.message)
-      // Overloaded model won't recover in seconds — jump to the fallback model
-      if (isOverloaded(error)) skipModel = plan.model
+      if (shouldSkipModel(error)) skipModels.add(plan.model)
     }
   }
 
   console.error("Gemini Fetch Error:", lastError?.message)
-  const overloaded = isOverloaded(lastError)
+  const transient = isTransientModelError(lastError)
   const err = new Error(
-    overloaded
+    transient
       ? "The AI model is experiencing high demand right now. Please try again in a minute."
-      : "Gemini API fetch failed"
+      : isUnavailableModel(lastError)
+        ? "Configured Gemini models are unavailable. Update GEMINI_MODELS on the server."
+        : "Gemini API fetch failed"
   )
-  err.status = overloaded ? 503 : 500
+  err.status = transient ? 503 : 500
   throw err
 }
 
-/** Mock tests / feedback — compact token budgets. */
+/** Mock tests / feedback — same model chain, smaller token budget. */
 export const generateGeminiJSON = async (prompt, options = {}) => {
   const maxOutputTokens = options.maxOutputTokens || 3072
   const temperature = options.temperature ?? 0.55
+  const config = { temperature, maxOutputTokens }
 
-  try {
-    return await callGemini(prompt, {
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature,
-        maxOutputTokens,
-      },
-    })
-  } catch (error) {
-    console.error("Gemini JSON attempt failed:", error.message)
-    if (error.status === 429) {
-      throw new Error("Gemini rate limit reached. Please wait a minute and try again.")
-    }
+  let lastError = null
+  const skipModels = new Set()
 
-    // Retry once without mime only for parse/empty issues
-    if (/parse|JSON|No text/i.test(error.message || "")) {
-      try {
-        return await callGemini(prompt, {
-          generationConfig: { temperature, maxOutputTokens },
-        })
-      } catch (err2) {
-        console.error("Gemini JSON fallback failed:", err2.message)
+  for (const model of MODEL_CHAIN) {
+    if (skipModels.has(model)) continue
+    try {
+      return await callGemini(prompt, {
+        model,
+        generationConfig: { ...config, responseMimeType: "application/json" },
+      })
+    } catch (error) {
+      lastError = error
+      console.warn(`Gemini JSON attempt failed (${model}):`, error.message)
+      if (shouldSkipModel(error)) {
+        skipModels.add(model)
+        continue
+      }
+      // Parse/empty issues — retry same model without JSON mime once
+      if (/parse|JSON|No text/i.test(error.message || "")) {
+        try {
+          return await callGemini(prompt, {
+            model,
+            generationConfig: config,
+          })
+        } catch (err2) {
+          lastError = err2
+          console.warn(`Gemini JSON plain retry failed (${model}):`, err2.message)
+          if (shouldSkipModel(err2)) skipModels.add(model)
+        }
       }
     }
-
-    const message = error?.message || "Gemini API fetch failed"
-    throw new Error(
-      /quota|rate|429/i.test(message)
-        ? "Gemini rate limit reached. Please wait a minute and try again."
-        : /parse|JSON/i.test(message)
-          ? "AI returned incomplete questions. Try fewer questions (10) and retry."
-          : "Gemini API fetch failed"
-    )
   }
+
+  const message = lastError?.message || "Gemini API fetch failed"
+  throw new Error(
+    /quota|rate|429/i.test(message)
+      ? "Gemini rate limit reached. Please wait a minute and try again."
+      : /parse|JSON/i.test(message)
+        ? "AI returned incomplete questions. Try fewer questions (10) and retry."
+        : "Gemini API fetch failed"
+  )
 }

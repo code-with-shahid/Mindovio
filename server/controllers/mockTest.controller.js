@@ -9,7 +9,8 @@ import {
   buildFallbackQuestions,
 } from "../utils/mockTestPrompt.js"
 
-const CREDIT_COST = 5
+// Mock tests are optional and free — no credits deducted
+const CREDIT_COST = 0
 const ALLOWED_COUNTS = [10, 20, 30, 50]
 const ALLOWED_DIFFICULTY = ["easy", "medium", "hard", "mixed"]
 const ALLOWED_Q_TYPES = [
@@ -266,12 +267,6 @@ export const generateMockTest = async (req, res) => {
     const user = await UserModel.findById(req.userId)
     if (!user) return res.status(404).json({ message: "User not found" })
 
-    if (user.credits < CREDIT_COST) {
-      user.isCreditAvailable = false
-      await user.save()
-      return res.status(403).json({ message: "Insufficient credits" })
-    }
-
     const note = await Notes.findOne({ _id: noteId, user: user._id })
     if (!note) return res.status(404).json({ message: "Notes not found" })
 
@@ -359,10 +354,6 @@ export const generateMockTest = async (req, res) => {
         message: "Generated questions could not be saved. Please try again.",
       })
     }
-
-    user.credits -= CREDIT_COST
-    if (user.credits <= 0) user.isCreditAvailable = false
-    await user.save()
 
     return res.status(200).json({
       testId: mock._id,

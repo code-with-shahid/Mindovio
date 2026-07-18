@@ -19,6 +19,7 @@ import {
   EMAILJS_SERVICE_ID,
   EMAILJS_TEMPLATE_ID,
 } from "../../constants/brand"
+import { submitFeedback } from "../../services/api"
 import { useToast } from "../../context/ToastContext"
 
 const SUBJECTS = [
@@ -77,36 +78,43 @@ export default function ContactSection() {
     const subjectLabel = SUBJECTS.find((s) => s.id === subject)?.label || "Support"
     setSending(true)
     try {
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          name: name.trim(),
-          email: email.trim(),
-          from_name: name.trim(),
-          from_email: email.trim(),
-          reply_to: email.trim(),
-          subject: `[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`,
-          subject_type: subjectLabel,
-          message: message.trim(),
-          to_email: BRAND_EMAIL,
-        },
-        { publicKey: EMAILJS_PUBLIC_KEY }
-      )
+      // Always store in admin Feedback inbox
+      await submitFeedback({
+        name: name.trim(),
+        email: email.trim(),
+        subject: subjectLabel,
+        message: message.trim(),
+      })
+
+      try {
+        await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          {
+            name: name.trim(),
+            email: email.trim(),
+            from_name: name.trim(),
+            from_email: email.trim(),
+            reply_to: email.trim(),
+            subject: `[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`,
+            subject_type: subjectLabel,
+            message: message.trim(),
+            to_email: BRAND_EMAIL,
+          },
+          { publicKey: EMAILJS_PUBLIC_KEY }
+        )
+      } catch (emailErr) {
+        console.warn("EmailJS optional send failed:", emailErr)
+      }
+
       toast("Message sent! We’ll get back to you soon.", "success")
       setName("")
       setEmail("")
       setSubject("support")
       setMessage("")
     } catch (err) {
-      console.error("EmailJS send failed:", err)
-      // Fallback: open the user's email app so the message still reaches us
-      const mailSubject = encodeURIComponent(`[${BRAND_NAME}] ${subjectLabel} — ${name.trim()}`)
-      const mailBody = encodeURIComponent(
-        `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subjectLabel}\n\n${message.trim()}`
-      )
-      window.location.href = `mailto:${BRAND_EMAIL}?subject=${mailSubject}&body=${mailBody}`
-      toast("Direct send failed — opening your email app instead", "info")
+      console.error("Feedback submit failed:", err)
+      toast(err?.response?.data?.message || "Could not send message. Try again.", "error")
     } finally {
       setSending(false)
     }

@@ -13,10 +13,10 @@ import {
   Play,
   Gift,
   Crosshair,
-  Database,
   CreditCard,
 } from "lucide-react"
 import LandingNavbar from "../components/landing/LandingNavbar"
+import AnnouncementBanner from "../components/AnnouncementBanner"
 import DemoPreviewSection from "../components/landing/DemoPreviewSection"
 import TestimonialsSection from "../components/landing/TestimonialsSection"
 import FAQSection from "../components/landing/FAQSection"
@@ -94,7 +94,7 @@ const steps = [
 ]
 
 const stats = [
-  { value: "50+", label: "Free credits", icon: Gift },
+  { value: "100", label: "Free credits", icon: Gift },
   { value: "< 2 min", label: "Avg. generation", icon: Zap },
   { value: "6+", label: "Output formats", icon: FileText },
   { value: "100%", label: "Exam-focused", icon: Crosshair },
@@ -103,7 +103,6 @@ const stats = [
 const trustBadges = [
   { label: "Google Gemini AI", icon: Sparkles, color: "text-emerald-400" },
   { label: "Stripe Payments", icon: CreditCard, color: "text-sky-400" },
-  { label: "MongoDB Storage", icon: Database, color: "text-green-400" },
   { label: "Secure Auth", icon: Shield, color: "text-violet-400" },
 ]
 
@@ -120,8 +119,12 @@ export default function Home() {
       <ScrollProgress />
       <LandingNavbar />
 
+      <div className="relative z-20 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-28">
+        <AnnouncementBanner limit={2} />
+      </div>
+
       {/* Hero — matches mockup: badge, heading, CTAs, tech badges | image */}
-      <section className="relative pt-28 sm:pt-32 pb-12 sm:pb-16 lg:pt-40 lg:pb-20 px-3 sm:px-6 lg:px-8">
+      <section className="relative pt-6 sm:pt-8 pb-12 sm:pb-16 lg:pt-16 lg:pb-20 px-3 sm:px-6 lg:px-8">
         <div className="relative max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 sm:gap-14 lg:gap-16 items-center min-w-0">
           <div className="min-w-0">
             <motion.div
@@ -130,7 +133,8 @@ export default function Home() {
               transition={{ duration: 0.45 }}
               className="mb-6"
             >
-              <span className="landing-badge uppercase tracking-[0.14em] text-[#C4B5FD]">
+              <span className="hero-brand-badge">
+                <Sparkles size={16} className="hero-brand-badge-icon" aria-hidden />
                 {BRAND_NAME}
               </span>
             </motion.div>

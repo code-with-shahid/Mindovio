@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     credits:{
         type:Number,
-        default:50,
+        default:100,
         min:0
     },
     isCreditAvailable:{
@@ -28,6 +28,20 @@ const userSchema = new mongoose.Schema({
         type:[mongoose.Schema.Types.ObjectId],
         ref:"Notes",
         default:[]
+    },
+    // Admin-facing flags (additive — defaults keep existing users working)
+    status:{
+        type:String,
+        enum:["active","banned","deactivated"],
+        default:"active"
+    },
+    bannedAt:{
+        type:Date,
+        default:null
+    },
+    banReason:{
+        type:String,
+        default:""
     }
 },{timestamps:true})
 

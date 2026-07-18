@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import { motion } from "motion/react"
 import { ClipboardList, Sparkles, X } from "lucide-react"
 import { generateMockTest } from "../../services/api"
@@ -50,7 +50,7 @@ export function MockTestCTA({ noteId, topic }) {
           </Button>
         </div>
         <p className="relative mt-4 type-caption text-[var(--color-text-muted)]">
-          Costs 5 credits · Usually ready in under a minute
+          Free & optional · Usually ready in under a minute
         </p>
       </motion.section>
 
@@ -71,15 +71,9 @@ function MockTestSetupModal({ noteId, topic, onClose }) {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const credits = useSelector((s) => s.user.userData?.credits ?? 0)
   const { toast } = useToast()
 
   const handleStart = async () => {
-    if (credits < 5) {
-      toast("You need at least 5 credits for a mock test", "error")
-      navigate("/pricing")
-      return
-    }
     setLoading(true)
     try {
       const data = await generateMockTest({ noteId, difficulty, questionCount })
@@ -95,7 +89,6 @@ function MockTestSetupModal({ noteId, topic, onClose }) {
     } catch (error) {
       const msg = error?.response?.data?.message || "Failed to generate mock test"
       toast(msg, "error")
-      if (error?.response?.status === 403) navigate("/pricing")
     } finally {
       setLoading(false)
     }
@@ -115,7 +108,7 @@ function MockTestSetupModal({ noteId, topic, onClose }) {
           <div className="min-w-0">
             <h3 id="mock-test-setup-title" className="type-h3">Configure Mock Test</h3>
             <p className="type-sm mt-1 text-[var(--color-text-secondary)] truncate">
-              {topic || "Your notes"} · 5 credits
+              {topic || "Your notes"} · Free
             </p>
           </div>
           <button

@@ -41,7 +41,7 @@ export default function LandingFooter() {
                 text="Start studying smarter today"
                 className="type-h1"
                 compact
-                subtitle={`Join students using ${BRAND_NAME} to prepare faster. 50 free credits — no card required.`}
+                subtitle={`Join students using ${BRAND_NAME} to prepare faster. 100 free credits — no card required.`}
               />
               <div className="mt-2">
                 <PremiumButton
