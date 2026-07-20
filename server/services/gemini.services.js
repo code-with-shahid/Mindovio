@@ -5,8 +5,10 @@ import { normalizeStudyGuide } from "../utils/normalizeStudyGuide.js"
  * Google retires / overloads models often — never ship a single hard-coded model.
  *
  * Env (any one works):
- *   GEMINI_MODELS=gemini-3.5-flash,gemini-2.0-flash,gemini-flash-latest
+ *   GEMINI_MODELS=gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest
  *   GEMINI_MODEL=... + GEMINI_FALLBACK_MODEL=...
+ *
+ * Note (2026): gemini-2.0-flash / flash-lite are shut down — do not use them.
  */
 function resolveModelChain() {
   const fromList = (process.env.GEMINI_MODELS || "")
@@ -14,10 +16,10 @@ function resolveModelChain() {
     .map((m) => m.trim())
     .filter(Boolean)
 
-  const primary = process.env.GEMINI_MODEL || "gemini-2.0-flash"
-  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-latest"
-  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-2.0-flash-lite"
-  const quaternary = process.env.GEMINI_FALLBACK_MODEL_3 || "gemini-1.5-flash"
+  const primary = process.env.GEMINI_MODEL || "gemini-3.5-flash"
+  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash"
+  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-2.5-flash-lite"
+  const quaternary = process.env.GEMINI_FALLBACK_MODEL_3 || "gemini-flash-latest"
 
   const chain = fromList.length
     ? fromList
@@ -25,8 +27,9 @@ function resolveModelChain() {
   return [...new Set(chain)]
 }
 
-const MODEL_CHAIN = resolveModelChain()
-const DEFAULT_MODEL = MODEL_CHAIN[0]
+function getModelChain() {
+  return resolveModelChain()
+}
 
 const isTransientModelError = (err) =>
   err?.status === 503 ||
@@ -135,9 +138,11 @@ function getResponseText(data) {
 }
 
 async function callGemini(prompt, { generationConfig, model } = {}) {
-  const modelName = model || DEFAULT_MODEL
+  const modelName = model || getModelChain()[0]
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is missing")
+    const err = new Error("GEMINI_API_KEY is missing on the server")
+    err.status = 500
+    throw err
   }
 
   const body = {
@@ -182,6 +187,7 @@ async function callGemini(prompt, { generationConfig, model } = {}) {
 
 /** Study-guide notes — walk the model chain until one succeeds. */
 export const generateGeminiResponse = async (prompt) => {
+  const MODEL_CHAIN = getModelChain()
   const config = { temperature: 0.45, maxOutputTokens: 4600 }
   const plans = []
   for (const model of MODEL_CHAIN) {
@@ -213,14 +219,15 @@ export const generateGeminiResponse = async (prompt) => {
       ? "The AI model is experiencing high demand right now. Please try again in a minute."
       : isUnavailableModel(lastError)
         ? "Configured Gemini models are unavailable. Update GEMINI_MODELS on the server."
-        : "Gemini API fetch failed"
+        : lastError?.message || "Gemini API fetch failed"
   )
-  err.status = transient ? 503 : 500
+  err.status = transient ? 503 : lastError?.status || 500
   throw err
 }
 
 /** Mock tests / feedback — same model chain, smaller token budget. */
 export const generateGeminiJSON = async (prompt, options = {}) => {
+  const MODEL_CHAIN = getModelChain()
   const maxOutputTokens = options.maxOutputTokens || 3072
   const temperature = options.temperature ?? 0.55
   const config = { temperature, maxOutputTokens }
@@ -264,6 +271,6 @@ export const generateGeminiJSON = async (prompt, options = {}) => {
       ? "Gemini rate limit reached. Please wait a minute and try again."
       : /parse|JSON/i.test(message)
         ? "AI returned incomplete questions. Try fewer questions (10) and retry."
-        : "Gemini API fetch failed"
+        : message
   )
 }
