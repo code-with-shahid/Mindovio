@@ -27,12 +27,29 @@ app.post(
   stripeWebhook
 );
 
-app.use(cors(
-    {origin:"http://localhost:5173",
-        credentials:true,
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-    }
-))
+const allowedOrigins = [
+  ...(process.env.CORS_ORIGINS || "").split(","),
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+]
+  .map((origin) => (origin || "").trim())
+  .filter(Boolean)
+  .filter((origin, index, list) => list.indexOf(origin) === index)
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Non-browser clients (no Origin) and allowlisted Vite/dev URLs
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+      return callback(new Error(`CORS blocked for origin: ${origin}`))
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  })
+)
 
 
 

@@ -7,6 +7,7 @@ export const cookieOptions = {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "none" : "lax",
+    path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
 }
 
@@ -74,6 +75,7 @@ export const logOut = async (req, res) => {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
+            path: "/",
         })
         return res.status(200).json({ message: "Logged out successfully" })
     } catch (error) {

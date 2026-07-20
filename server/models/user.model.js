@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema({
     banReason:{
         type:String,
         default:""
+    },
+    // Idempotent Stripe Checkout session ids (test + live)
+    creditedStripeSessions:{
+        type:[String],
+        default:[]
     }
 },{timestamps:true})
 
