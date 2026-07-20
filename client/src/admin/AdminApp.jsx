@@ -23,7 +23,7 @@ import { PageLoader } from "../components/ui/Spinner"
 function AdminGate({ children }) {
   const { admin, loading } = useAdminAuth()
   if (loading) return <PageLoader />
-  if (!admin) return <Navigate to="/admin/login" replace />
+  if (!admin) return <Navigate to="/login" replace />
   return children
 }
 

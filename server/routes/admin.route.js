@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import isAdminAuth from "../middleware/isAdminAuth.js"
 import {
   adminLogin,
+  tryAdminLogin,
   adminLogout,
   adminMe,
 } from "../controllers/admin.auth.controller.js"
@@ -47,7 +48,16 @@ const loginLimiter = rateLimit({
   message: { message: "Too many login attempts. Try again in 15 minutes." },
 })
 
+const tryLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many login attempts. Try again in 15 minutes." },
+})
+
 adminRouter.post("/login", loginLimiter, adminLogin)
+adminRouter.post("/try-login", tryLoginLimiter, tryAdminLogin)
 
 adminRouter.use(isAdminAuth)
 

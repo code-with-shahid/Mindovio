@@ -9,6 +9,10 @@ const adminApi = axios.create({
 export const adminLogin = (email, password) =>
   adminApi.post("/login", { email, password }).then((r) => r.data)
 
+/** Soft admin check for the main /login page (non-admin emails return { admin: false }). */
+export const tryAdminLogin = (email, password) =>
+  adminApi.post("/try-login", { email, password }).then((r) => r.data)
+
 export const adminLogout = () => adminApi.post("/logout").then((r) => r.data)
 
 export const adminMe = () => adminApi.get("/me").then((r) => r.data)

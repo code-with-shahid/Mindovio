@@ -66,6 +66,66 @@ export const adminLogin = async (req, res) => {
   }
 }
 
+/**
+ * Soft check used by the main /login page.
+ * - Matching ADMIN_EMAIL + ADMIN_PASSWORD → sets cookie, { admin: true }
+ * - Matching email, wrong password → 401
+ * - Any other email → { admin: false } (caller continues as normal user)
+ */
+export const tryAdminLogin = async (req, res) => {
+  try {
+    const { email: envEmail, password: envPassword } = getAdminCredentials()
+    const email = String(req.body?.email || "")
+      .trim()
+      .toLowerCase()
+    const password = String(req.body?.password || "")
+
+    if (!envEmail || !envPassword || !email || !password) {
+      return res.status(200).json({ admin: false })
+    }
+
+    const emailOk = safeEqualString(email, envEmail)
+    if (!emailOk) {
+      return res.status(200).json({ admin: false })
+    }
+
+    const passOk = safeEqualString(password, envPassword)
+    if (!passOk) {
+      await writeAdminLog({
+        action: "login_failed",
+        actorEmail: email,
+        meta: { reason: "invalid_credentials", via: "try_login" },
+        req,
+      })
+      return res.status(401).json({ message: "Invalid admin credentials" })
+    }
+
+    const token = signAdminToken(envEmail)
+    const hours = getAdminSessionHours()
+    res.cookie("admin_token", token, {
+      ...adminCookieOptions,
+      maxAge: hours * 60 * 60 * 1000,
+    })
+
+    await writeAdminLog({
+      action: "login",
+      actorEmail: envEmail,
+      meta: { via: "main_login" },
+      req,
+    })
+
+    return res.status(200).json({
+      admin: true,
+      email: envEmail,
+      role: "admin",
+      sessionHours: hours,
+    })
+  } catch (error) {
+    console.error("tryAdminLogin:", error)
+    return res.status(200).json({ admin: false })
+  }
+}
+
 export const adminLogout = async (req, res) => {
   try {
     await writeAdminLog({

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import { tryAdminLogin } from "../admin/services/adminApi"
 import AuthLayout from "../components/auth/AuthLayout"
 import GoogleAuthButton, { AuthDivider, AuthError, AuthInput } from "../components/auth/AuthForm"
 import Button from "../components/ui/Button"
@@ -22,7 +23,35 @@ export default function Login() {
     e.preventDefault()
     setError("")
     setLoading(true)
-    const result = await login(email, password)
+
+    const trimmedEmail = email.trim()
+
+    // Admin credentials (ADMIN_EMAIL / ADMIN_PASSWORD) → admin panel
+    try {
+      const adminResult = await tryAdminLogin(trimmedEmail, password)
+      if (adminResult?.admin) {
+        setLoading(false)
+        navigate("/admin", { replace: true })
+        return
+      }
+    } catch (err) {
+      const status = err?.response?.status
+      const message = err?.response?.data?.message
+      // Wrong password for the admin email
+      if (status === 401) {
+        setLoading(false)
+        setError(message || "Invalid admin credentials")
+        return
+      }
+      if (status === 429) {
+        setLoading(false)
+        setError(message || "Too many login attempts. Try again later.")
+        return
+      }
+      // Network / other errors: fall through to normal user login
+    }
+
+    const result = await login(trimmedEmail, password)
     setLoading(false)
     if (result.success) {
       navigate(from, { replace: true })
