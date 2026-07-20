@@ -1,0 +1,38 @@
+# Render Blueprint — Mindovio API
+# https://dashboard.render.com → New → Blueprint → connect code-with-shahid/Mindovio
+services:
+  - type: web
+    name: mindovio-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      - key: CLIENT_URL
+        value: https://authexamnotes-f0c26.web.app
+      - key: CORS_ORIGINS
+        value: https://authexamnotes-f0c26.web.app,https://authexamnotes-f0c26.firebaseapp.com
+      - key: MONGODB_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_JWT_SECRET
+        sync: false
+      - key: ADMIN_SESSION_HOURS
+        value: "8"
