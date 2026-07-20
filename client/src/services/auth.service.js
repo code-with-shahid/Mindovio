@@ -6,7 +6,7 @@ import {
   updateProfile,
 } from "firebase/auth"
 import { auth, googleProvider } from "../utils/firebase"
-import api, { clearAuthToken, storeAuthToken } from "./http"
+import api, { clearAuthToken, getStoredToken, storeAuthToken } from "./http"
 
 export const syncBackendSession = async (firebaseUser) => {
   const { data } = await api.post("/api/auth/session", {
@@ -20,6 +20,7 @@ export const syncBackendSession = async (firebaseUser) => {
 }
 
 export const fetchBackendUser = async () => {
+  if (!getStoredToken()) return null
   try {
     const { data } = await api.get("/api/user/currentuser")
     return data

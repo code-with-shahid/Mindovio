@@ -12,6 +12,7 @@ import {
   signInWithGoogle,
   getFirebaseErrorMessage,
 } from "../services/auth.service"
+import { clearAuthToken, getStoredToken } from "../services/http"
 
 const AuthContext = createContext(null)
 
@@ -30,11 +31,18 @@ export function AuthProvider({ children }) {
         if (user) {
           const backendUser = await syncBackendSession(user)
           dispatch(setUserData(backendUser))
-        } else {
+        } else if (getStoredToken()) {
+          // Cookie/Bearer session without Firebase (rare) — only then hit the API
           const backendUser = await fetchBackendUser()
+          if (!backendUser) clearAuthToken()
           dispatch(setUserData(backendUser))
+        } else {
+          // Logged out — do not call /currentuser (avoids noisy 401 in console)
+          clearAuthToken()
+          dispatch(setUserData(null))
         }
       } catch {
+        clearAuthToken()
         dispatch(setUserData(null))
       } finally {
         if (!resolved) {
