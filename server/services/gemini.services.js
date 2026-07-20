@@ -2,33 +2,47 @@ import { normalizeStudyGuide } from "../utils/normalizeStudyGuide.js"
 
 /**
  * Model chain for production resilience.
- * Google retires / overloads models often — never ship a single hard-coded model.
+ * Prefer models that work for new/free-tier keys; skip shut-down IDs even if set in env.
  *
- * Env (any one works):
- *   GEMINI_MODELS=gemini-3.5-flash,gemini-2.5-flash,gemini-flash-latest
- *   GEMINI_MODEL=... + GEMINI_FALLBACK_MODEL=...
- *
- * Note (2026): gemini-2.0-flash / flash-lite are shut down — do not use them.
+ * Env:
+ *   GEMINI_MODELS=gemini-3.1-flash-lite,gemini-3.5-flash,gemini-flash-latest
  */
+const BLOCKED_MODELS = new Set([
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-001",
+  "gemini-2.0-flash-lite",
+  "gemini-2.0-flash-lite-001",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro",
+])
+
 function resolveModelChain() {
   const fromList = (process.env.GEMINI_MODELS || "")
     .split(",")
     .map((m) => m.trim())
     .filter(Boolean)
 
-  const primary = process.env.GEMINI_MODEL || "gemini-3.5-flash"
-  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash"
-  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-2.5-flash-lite"
-  const quaternary = process.env.GEMINI_FALLBACK_MODEL_3 || "gemini-flash-latest"
+  const primary = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite"
+  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash"
+  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-flash-latest"
+  const quaternary = process.env.GEMINI_FALLBACK_MODEL_3 || "gemini-3-flash"
 
   const chain = fromList.length
     ? fromList
     : [primary, fallback, tertiary, quaternary]
-  return [...new Set(chain)]
+
+  return [...new Set(chain)].filter((m) => m && !BLOCKED_MODELS.has(m))
 }
 
 function getModelChain() {
-  return resolveModelChain()
+  const chain = resolveModelChain()
+  // Always keep a known-working free-tier model as last resort
+  if (!chain.includes("gemini-3.1-flash-lite")) {
+    chain.push("gemini-3.1-flash-lite")
+  }
+  return chain.length ? chain : ["gemini-3.1-flash-lite"]
 }
 
 const isTransientModelError = (err) =>
