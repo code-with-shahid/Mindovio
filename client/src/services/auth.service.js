@@ -1,4 +1,3 @@
-import axios from "axios"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,25 +6,22 @@ import {
   updateProfile,
 } from "firebase/auth"
 import { auth, googleProvider } from "../utils/firebase"
-import { serverUrl } from "../config"
-
-const sessionApi = axios.create({
-  baseURL: serverUrl,
-  withCredentials: true,
-})
+import api, { clearAuthToken, storeAuthToken } from "./http"
 
 export const syncBackendSession = async (firebaseUser) => {
-  const { data } = await sessionApi.post("/api/auth/session", {
+  const { data } = await api.post("/api/auth/session", {
     name: firebaseUser.displayName || firebaseUser.email?.split("@")[0],
     email: firebaseUser.email,
     firebaseUid: firebaseUser.uid,
   })
-  return data
+  if (data?.token) storeAuthToken(data.token)
+  const { token: _token, ...user } = data
+  return user
 }
 
 export const fetchBackendUser = async () => {
   try {
-    const { data } = await sessionApi.get("/api/user/currentuser")
+    const { data } = await api.get("/api/user/currentuser")
     return data
   } catch {
     return null
@@ -33,7 +29,11 @@ export const fetchBackendUser = async () => {
 }
 
 export const logoutBackend = async () => {
-  await sessionApi.get("/api/auth/logout")
+  try {
+    await api.get("/api/auth/logout")
+  } finally {
+    clearAuthToken()
+  }
 }
 
 export const signUpWithEmail = async ({ name, email, password }) => {

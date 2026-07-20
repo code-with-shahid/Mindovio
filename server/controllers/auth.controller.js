@@ -1,15 +1,10 @@
 import UserModel from "../models/user.model.js"
 import { getToken } from "../utils/token.js"
+import { buildCookieOptions, isSecureCookieMode } from "../utils/cookieOptions.js"
 
-const isProd = process.env.NODE_ENV === "production"
-
-export const cookieOptions = {
-  httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? "none" : "lax",
-  path: "/",
+export const cookieOptions = buildCookieOptions({
   maxAge: 7 * 24 * 60 * 60 * 1000,
-}
+})
 
 const findOrCreateUser = async ({ name, email, firebaseUid }) => {
   let user = await UserModel.findOne({ email })
@@ -42,7 +37,7 @@ const findOrCreateUser = async ({ name, email, firebaseUid }) => {
 const issueSession = async (res, user) => {
   const token = await getToken(user._id)
   res.cookie("token", token, cookieOptions)
-  return user
+  return token
 }
 
 export const syncSession = async (req, res) => {
@@ -59,8 +54,10 @@ export const syncSession = async (req, res) => {
       firebaseUid,
     })
 
-    await issueSession(res, user)
-    return res.status(200).json(user)
+    const token = await issueSession(res, user)
+    const payload = typeof user.toObject === "function" ? user.toObject() : { ...user }
+    // Bearer fallback for cross-site browsers that block third-party cookies
+    return res.status(200).json({ ...payload, token })
   } catch (error) {
     console.error("syncSession error:", error)
     return res.status(500).json({ message: "Failed to create session" })
@@ -71,14 +68,11 @@ export const googleAuth = syncSession
 
 export const logOut = async (req, res) => {
   try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      path: "/",
-    })
+    res.clearCookie("token", buildCookieOptions())
     return res.status(200).json({ message: "Logged out successfully" })
   } catch (error) {
     return res.status(500).json({ message: "Logout failed" })
   }
 }
+
+export { isSecureCookieMode }

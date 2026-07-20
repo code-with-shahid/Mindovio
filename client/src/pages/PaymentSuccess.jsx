@@ -3,9 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { motion } from "motion/react"
 import { useDispatch } from "react-redux"
 import { HiCheckCircle } from "react-icons/hi2"
-import axios from "axios"
 import { getCurrentUser } from "../services/api"
-import { serverUrl } from "../config"
+import api from "../services/http"
 import Button from "../components/ui/Button"
 import Card from "../components/ui/Card"
 import BrandLogo from "../components/ui/BrandLogo"
@@ -24,11 +23,7 @@ export default function PaymentSuccess() {
     const run = async () => {
       try {
         if (sessionId) {
-          await axios.post(
-            `${serverUrl}/api/credit/confirm`,
-            { sessionId },
-            { withCredentials: true }
-          )
+          await api.post("/api/credit/confirm", { sessionId })
         }
         if (!cancelled) setStatusText("Your credits have been added to your account.")
         await getCurrentUser(dispatch)

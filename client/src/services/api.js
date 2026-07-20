@@ -1,5 +1,4 @@
-import axios from "axios"
-import { serverUrl } from "../config"
+import api from "./http"
 import { setUserData } from "../redux/userSlice"
 import { fetchBackendUser } from "./auth.service"
 
@@ -9,19 +8,15 @@ export const getCurrentUser = async (dispatch) => {
 }
 
 export const generateNotes = async (payload) => {
-  const result = await axios.post(
-    serverUrl + "/api/notes/generate-notes",
-    payload,
-    { withCredentials: true }
-  )
+  const result = await api.post("/api/notes/generate-notes", payload)
   return result.data
 }
 
 export const downloadPdf = async (result) => {
-  const response = await axios.post(
-    serverUrl + "/api/pdf/generate-pdf",
+  const response = await api.post(
+    "/api/pdf/generate-pdf",
     { result },
-    { responseType: "blob", withCredentials: true }
+    { responseType: "blob" }
   )
   const blob = new Blob([response.data], { type: "application/pdf" })
   const url = window.URL.createObjectURL(blob)
@@ -33,53 +28,41 @@ export const downloadPdf = async (result) => {
 }
 
 export const generateMockTest = async (payload) => {
-  const result = await axios.post(serverUrl + "/api/mock-tests/generate", payload, {
-    withCredentials: true,
-  })
+  const result = await api.post("/api/mock-tests/generate", payload)
   return result.data
 }
 
 export const getMockTest = async (testId) => {
-  const result = await axios.get(serverUrl + `/api/mock-tests/${testId}`, {
-    withCredentials: true,
-  })
+  const result = await api.get(`/api/mock-tests/${testId}`)
   return result.data
 }
 
 export const startMockTest = async (testId) => {
-  const result = await axios.post(
-    serverUrl + `/api/mock-tests/${testId}/start`,
-    {},
-    { withCredentials: true }
-  )
+  const result = await api.post(`/api/mock-tests/${testId}/start`, {})
   return result.data
 }
 
 export const submitMockTest = async (testId, payload) => {
-  const result = await axios.post(
-    serverUrl + `/api/mock-tests/${testId}/submit`,
-    payload,
-    { withCredentials: true }
-  )
+  const result = await api.post(`/api/mock-tests/${testId}/submit`, payload)
   return result.data
 }
 
 export const listMockTests = async () => {
-  const result = await axios.get(serverUrl + "/api/mock-tests", { withCredentials: true })
+  const result = await api.get("/api/mock-tests")
   return result.data
 }
 
 export const fetchPublishedAnnouncements = async () => {
-  const result = await axios.get(serverUrl + "/api/announcements")
+  const result = await api.get("/api/announcements")
   return result.data
 }
 
 export const fetchPublishedNotifications = async () => {
-  const result = await axios.get(serverUrl + "/api/notifications")
+  const result = await api.get("/api/notifications")
   return result.data
 }
 
 export const submitFeedback = async (payload) => {
-  const result = await axios.post(serverUrl + "/api/feedback", payload)
+  const result = await api.post("/api/feedback", payload)
   return result.data
 }

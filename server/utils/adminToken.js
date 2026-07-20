@@ -1,14 +1,8 @@
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
+import { buildCookieOptions } from "./cookieOptions.js"
 
-const isProd = process.env.NODE_ENV === "production"
-
-export const adminCookieOptions = {
-  httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? "none" : "lax",
-  path: "/",
-}
+export const adminCookieOptions = buildCookieOptions()
 
 export function getAdminSessionHours() {
   const h = Number(process.env.ADMIN_SESSION_HOURS)
@@ -27,7 +21,6 @@ export function safeEqualString(a, b) {
   const left = Buffer.from(String(a || ""), "utf8")
   const right = Buffer.from(String(b || ""), "utf8")
   if (left.length !== right.length) {
-    // Still compare to reduce timing leaks on length
     crypto.timingSafeEqual(left, left)
     return false
   }

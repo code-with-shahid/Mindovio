@@ -14,11 +14,14 @@ function resolveModelChain() {
     .map((m) => m.trim())
     .filter(Boolean)
 
-  const primary = process.env.GEMINI_MODEL || "gemini-3.5-flash"
-  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.0-flash"
-  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-flash-latest"
+  const primary = process.env.GEMINI_MODEL || "gemini-2.0-flash"
+  const fallback = process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-latest"
+  const tertiary = process.env.GEMINI_FALLBACK_MODEL_2 || "gemini-2.0-flash-lite"
+  const quaternary = process.env.GEMINI_FALLBACK_MODEL_3 || "gemini-1.5-flash"
 
-  const chain = fromList.length ? fromList : [primary, fallback, tertiary]
+  const chain = fromList.length
+    ? fromList
+    : [primary, fallback, tertiary, quaternary]
   return [...new Set(chain)]
 }
 
