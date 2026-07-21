@@ -5,7 +5,7 @@ import { useSelector } from "react-redux"
 import { HiChevronDown, HiArrowRightOnRectangle, HiClock, HiClipboardDocumentList, HiSparkles } from "react-icons/hi2"
 import { useAuth } from "../../context/AuthContext"
 import ThemeToggle from "../ui/ThemeToggle"
-import Button from "../ui/Button"
+import InstallAppMenuItem from "../pwa/InstallAppMenuItem"
 
 export function DashboardTopbar({ title, subtitle }) {
   const { userData } = useSelector((state) => state.user)
@@ -74,6 +74,7 @@ export function DashboardTopbar({ title, subtitle }) {
                     </div>
                     <MenuItem icon={<HiClock />} label="History" onClick={() => { setMenuOpen(false); navigate("/history") }} />
                     <MenuItem icon={<HiClipboardDocumentList />} label="Mock Tests" onClick={() => { setMenuOpen(false); navigate("/mock-tests") }} />
+                    <InstallAppMenuItem onDone={() => setMenuOpen(false)} />
                     <MenuItem icon={<HiArrowRightOnRectangle />} label="Sign out" onClick={handleSignOut} danger />
                   </motion.div>
                 </>

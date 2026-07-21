@@ -5,6 +5,7 @@ import { Home, FileText, Clock, CreditCard, ClipboardList, Menu, X } from "lucid
 import BrandLogo from "../ui/BrandLogo"
 import AmbientBackground from "../landing/motion/AmbientBackground"
 import AnnouncementBanner from "../AnnouncementBanner"
+import InstallAppMenuItem from "../pwa/InstallAppMenuItem"
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
@@ -70,6 +71,8 @@ export default function DashboardLayout({ children }) {
               </button>
             )
           })}
+          <div className="my-2 border-t border-[var(--color-border)]" />
+          <InstallAppMenuItem variant="sidebar" />
         </nav>
 
         <div className="premium-card rounded-xl p-3 xl:p-4 mt-auto">
@@ -132,6 +135,11 @@ export default function DashboardLayout({ children }) {
                   {label}
                 </button>
               ))}
+              <div className="my-2 border-t border-[var(--color-border)]" />
+              <InstallAppMenuItem
+                variant="sidebar"
+                onDone={() => setMobileOpen(false)}
+              />
             </motion.nav>
           </div>
         )}

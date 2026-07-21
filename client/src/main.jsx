@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import { Provider } from "react-redux"
 import { registerSW } from "virtual:pwa-register"
+import { initPwaInstall } from "./hooks/usePwaInstall"
 
 import { ThemeProvider } from "./context/ThemeContext"
 import { AuthProvider } from "./context/AuthContext"
@@ -11,6 +12,7 @@ import store from "./redux/store"
 import App from "./App"
 import "./index.css"
 
+initPwaInstall()
 registerSW({ immediate: true })
 
 createRoot(document.getElementById("root")).render(

@@ -1,54 +1,33 @@
-import { useEffect, useState } from "react"
 import { Download, X } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
+import { useEffect, useState } from "react"
+import { usePwaInstall } from "../../hooks/usePwaInstall"
 
 const DISMISS_KEY = "mindovio-pwa-install-dismissed"
 
-function isStandalone() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true
-  )
-}
-
 /**
- * Shows an install prompt when the browser fires `beforeinstallprompt`
- * (Chrome/Edge/Android). iOS users get a short “Add to Home Screen” hint.
+ * Bottom sheet install prompt (Chrome/Edge/Android + iOS hint).
+ * Only auto-shows when install is available or iOS instructions apply.
  */
 export default function InstallPWA({ className = "" }) {
-  const [deferred, setDeferred] = useState(null)
+  const { canInstall, isIosHint, install } = usePwaInstall()
   const [visible, setVisible] = useState(false)
-  const [iosHint, setIosHint] = useState(false)
 
   useEffect(() => {
-    if (isStandalone()) return
+    if (!(canInstall || isIosHint)) {
+      setVisible(false)
+      return
+    }
     try {
       if (sessionStorage.getItem(DISMISS_KEY) === "1") return
     } catch {
       /* ignore */
     }
-
-    const onBeforeInstall = (e) => {
-      e.preventDefault()
-      setDeferred(e)
-      setVisible(true)
-    }
-    window.addEventListener("beforeinstallprompt", onBeforeInstall)
-
-    const ua = window.navigator.userAgent || ""
-    const isIos = /iphone|ipad|ipod/i.test(ua)
-    const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios/i.test(ua)
-    if (isIos && isSafari) {
-      setIosHint(true)
-      setVisible(true)
-    }
-
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall)
-  }, [])
+    setVisible(true)
+  }, [canInstall, isIosHint])
 
   const dismiss = () => {
     setVisible(false)
-    setDeferred(null)
     try {
       sessionStorage.setItem(DISMISS_KEY, "1")
     } catch {
@@ -56,16 +35,12 @@ export default function InstallPWA({ className = "" }) {
     }
   }
 
-  const install = async () => {
-    if (!deferred) return
-    deferred.prompt()
-    try {
-      await deferred.userChoice
-    } catch {
-      /* ignore */
+  const onInstall = async () => {
+    const result = await install()
+    if (result?.ok || result?.reason === "ios") {
+      /* keep open for iOS hint; close after native prompt */
     }
-    setDeferred(null)
-    setVisible(false)
+    if (result?.ok) setVisible(false)
   }
 
   return (
@@ -88,14 +63,14 @@ export default function InstallPWA({ className = "" }) {
                 Install Mindovio
               </p>
               <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
-                {iosHint && !deferred
+                {isIosHint
                   ? "Tap Share, then “Add to Home Screen” to install."
                   : "Install the app for faster access from your home screen."}
               </p>
-              {deferred && (
+              {canInstall && (
                 <button
                   type="button"
-                  onClick={install}
+                  onClick={onInstall}
                   className="mt-2 inline-flex items-center rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-500"
                 >
                   Install app

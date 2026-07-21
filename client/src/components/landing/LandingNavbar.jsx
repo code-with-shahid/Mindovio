@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import { useSelector } from "react-redux"
-import { Menu, X, Sparkles } from "lucide-react"
+import { Menu, X, Sparkles, Download } from "lucide-react"
 import BrandLogo from "../ui/BrandLogo"
 import ThemeToggle from "../ui/ThemeToggle"
 import PremiumButton from "./motion/PremiumButton"
+import { usePwaInstall } from "../../hooks/usePwaInstall"
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -21,6 +22,8 @@ export default function LandingNavbar() {
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [active, setActive] = useState("")
+  const { showInstallOption, canInstall, isIosHint, install } = usePwaInstall()
+  const [installHint, setInstallHint] = useState("")
 
   useEffect(() => {
     const ids = navLinks.map((l) => l.href.slice(1))
@@ -60,6 +63,20 @@ export default function LandingNavbar() {
     setMobileOpen(false)
     setActive(href)
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const handleDownloadApp = async () => {
+    setInstallHint("")
+    const result = await install()
+    if (result?.reason === "ios" || isIosHint) {
+      setInstallHint("On iPhone: Share → Add to Home Screen")
+      return
+    }
+    if (result?.reason === "unavailable") {
+      setInstallHint("Use Chrome or Edge to install the app")
+      return
+    }
+    if (result?.ok) setMobileOpen(false)
   }
 
   return (
@@ -164,6 +181,24 @@ export default function LandingNavbar() {
                   {label}
                 </button>
               ))}
+              {showInstallOption && (
+                <>
+                  <div className="my-2 border-t border-[var(--color-border)]" />
+                  <button
+                    type="button"
+                    onClick={handleDownloadApp}
+                    className="flex w-full items-center gap-3 px-3 py-3 text-left text-sm font-medium rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/5"
+                  >
+                    <Download size={18} className="shrink-0 text-brand-500" />
+                    {canInstall ? "Download App" : "Install App"}
+                  </button>
+                  {installHint && (
+                    <p className="px-3 pb-2 text-xs text-[var(--color-text-muted)]">
+                      {installHint}
+                    </p>
+                  )}
+                </>
+              )}
             </motion.div>
           </>
         )}
