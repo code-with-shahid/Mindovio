@@ -14,6 +14,7 @@ import MockTestHistory from "./pages/MockTestHistory"
 import ProtectedRoute, { GuestRoute } from "./components/layout/ProtectedRoute"
 import { useAuth } from "./context/AuthContext"
 import { PageLoader } from "./components/ui/Spinner"
+import InstallPWA from "./components/pwa/InstallPWA"
 
 const AdminApp = lazy(() => import("./admin/AdminApp"))
 
@@ -23,7 +24,8 @@ function App() {
   if (initializing) return <PageLoader />
 
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
@@ -49,7 +51,9 @@ function App() {
       />
 
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+      <InstallPWA />
+    </>
   )
 }
 
