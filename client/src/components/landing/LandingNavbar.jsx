@@ -69,17 +69,21 @@ export default function LandingNavbar() {
       transition={{ duration: 0.5 }}
       className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4"
     >
-      <nav className="landing-navbar mx-auto max-w-7xl flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl min-w-0">
-        <div className="relative min-w-0 shrink">
+      <nav className="landing-navbar mx-auto max-w-7xl flex items-center justify-between gap-3 sm:gap-4 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl min-w-0 overflow-hidden">
+        <div className="relative min-w-0 flex-1 overflow-hidden pr-2">
           <span
-            className="pointer-events-none absolute -inset-2 rounded-xl bg-[#7C5CFF]/20 blur-md opacity-80"
+            className="pointer-events-none absolute -inset-1 rounded-xl bg-[#7C5CFF]/20 blur-md opacity-80 max-md:hidden"
             aria-hidden
           />
           <BrandLogo showTagline className="hidden md:flex relative" />
-          <BrandLogo size="sm" className="md:hidden relative" />
+          {/* Mobile: icon only on very narrow screens so theme controls never overlap */}
+          <BrandLogo
+            size="sm"
+            className="md:hidden relative max-[420px]:[&>div]:hidden"
+          />
         </div>
 
-        <div className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium">
+        <div className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium shrink-0">
           {navLinks.map(({ label, href }) => (
             <button
               key={href}
@@ -92,8 +96,8 @@ export default function LandingNavbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <ThemeToggle />
+        <div className="relative z-10 flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <ThemeToggle className="shrink-0" />
           {userData ? (
             <PremiumButton size="sm" onClick={() => navigate("/dashboard")} icon={<Sparkles size={16} />}>
               <span className="hidden sm:inline">Dashboard</span>
@@ -109,7 +113,7 @@ export default function LandingNavbar() {
               >
                 Sign in
               </PremiumButton>
-              <PremiumButton size="sm" onClick={() => navigate("/signup")}>
+              <PremiumButton size="sm" onClick={() => navigate("/signup")} className="shrink-0">
                 <span className="hidden sm:inline">Get Started</span>
                 <span className="sm:hidden">Start</span>
               </PremiumButton>
@@ -118,7 +122,7 @@ export default function LandingNavbar() {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/5"
+            className="lg:hidden p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/5 shrink-0"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-menu"

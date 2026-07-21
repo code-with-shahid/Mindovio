@@ -19,14 +19,14 @@ export default function BrandLogo({
   const tagColor = onDark ? "text-slate-400" : "text-[var(--color-text-muted)]"
 
   return (
-    <Link to={to} className={`flex items-center gap-2.5 shrink-0 ${className}`}>
-      <img src={logo} alt={BRAND_NAME} className={`${s.img} rounded-lg`} />
-      <div className="min-w-0">
-        <span className={`${s.text} font-bold ${titleColor} leading-tight block`}>
+    <Link to={to} className={`flex items-center gap-2 min-w-0 ${className}`}>
+      <img src={logo} alt={BRAND_NAME} className={`${s.img} rounded-lg shrink-0`} />
+      <div className="min-w-0 overflow-hidden">
+        <span className={`${s.text} font-bold ${titleColor} leading-tight block truncate`}>
           {BRAND_NAME}
         </span>
         {showTagline && (
-          <span className={`${s.tag} ${tagColor} leading-none block`}>
+          <span className={`${s.tag} ${tagColor} leading-none block truncate`}>
             {BRAND_TAGLINE}
           </span>
         )}
