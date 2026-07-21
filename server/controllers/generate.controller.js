@@ -2,6 +2,7 @@ import Notes from "../models/notes.model.js"
 import UserModel from "../models/user.model.js"
 import { generateGeminiResponse } from "../services/gemini.services.js"
 import { buildPrompt } from "../utils/promptBuilder.js"
+import { cacheInvalidate, CACHE_KEYS } from "../utils/cache.js"
 
 export const NOTES_CREDIT_COST = 10
 
@@ -81,6 +82,9 @@ export const generateNotes = async (req, res) => {
       updated.isCreditAvailable = false
       await updated.save()
     }
+
+    cacheInvalidate(CACHE_KEYS.ADMIN_STATS)
+    cacheInvalidate(CACHE_KEYS.ADMIN_ANALYTICS)
 
     return res.status(200).json({
       data: aiResponse,

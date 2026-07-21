@@ -13,6 +13,7 @@ import {
   getFirebaseErrorMessage,
 } from "../services/auth.service"
 import { clearAuthToken, getStoredToken } from "../services/http"
+import { cacheClear } from "../services/cache"
 
 const AuthContext = createContext(null)
 
@@ -39,10 +40,12 @@ export function AuthProvider({ children }) {
         } else {
           // Logged out — do not call /currentuser (avoids noisy 401 in console)
           clearAuthToken()
+          cacheClear()
           dispatch(setUserData(null))
         }
       } catch {
         clearAuthToken()
+        cacheClear()
         dispatch(setUserData(null))
       } finally {
         if (!resolved) {

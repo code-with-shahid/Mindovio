@@ -6,6 +6,12 @@ import Feedback from "../models/feedback.model.js"
 import Notification from "../models/notification.model.js"
 import AdminLog from "../models/adminLog.model.js"
 import { writeAdminLog } from "../utils/adminLog.js"
+import {
+  cacheAside,
+  cacheInvalidate,
+  CACHE_KEYS,
+  CACHE_TTL,
+} from "../utils/cache.js"
 
 const CREDIT_PLANS = [
   { amountInr: 100, credits: 50, label: "Starter" },
@@ -46,54 +52,58 @@ function bucketByDay(docs, dateField, days) {
 /** GET /api/admin/stats */
 export const getStats = async (req, res) => {
   try {
-    const today = startOfToday()
-    const [
-      totalUsers,
-      todayUsers,
-      activeUsers,
-      premiumUsers,
-      freeUsers,
-      bannedUsers,
-      generatedNotes,
-      mockTests,
-      submittedMocks,
-      avgCredits,
-    ] = await Promise.all([
-      UserModel.countDocuments(),
-      UserModel.countDocuments({ createdAt: { $gte: today } }),
-      UserModel.countDocuments({ updatedAt: { $gte: daysAgo(7) } }),
-      UserModel.countDocuments({ credits: { $gt: PREMIUM_CREDITS_THRESHOLD } }),
-      UserModel.countDocuments({ credits: { $lte: PREMIUM_CREDITS_THRESHOLD } }),
-      UserModel.countDocuments({ status: "banned" }),
-      Notes.countDocuments(),
-      MockTest.countDocuments(),
-      MockTest.countDocuments({ status: "submitted" }),
-      UserModel.aggregate([{ $group: { _id: null, avg: { $avg: "$credits" } } }]),
-    ])
+    const payload = await cacheAside(CACHE_KEYS.ADMIN_STATS, CACHE_TTL.ADMIN_STATS, async () => {
+      const today = startOfToday()
+      const [
+        totalUsers,
+        todayUsers,
+        activeUsers,
+        premiumUsers,
+        freeUsers,
+        bannedUsers,
+        generatedNotes,
+        mockTests,
+        submittedMocks,
+        avgCredits,
+      ] = await Promise.all([
+        UserModel.countDocuments(),
+        UserModel.countDocuments({ createdAt: { $gte: today } }),
+        UserModel.countDocuments({ updatedAt: { $gte: daysAgo(7) } }),
+        UserModel.countDocuments({ credits: { $gt: PREMIUM_CREDITS_THRESHOLD } }),
+        UserModel.countDocuments({ credits: { $lte: PREMIUM_CREDITS_THRESHOLD } }),
+        UserModel.countDocuments({ status: "banned" }),
+        Notes.countDocuments(),
+        MockTest.countDocuments(),
+        MockTest.countDocuments({ status: "submitted" }),
+        UserModel.aggregate([{ $group: { _id: null, avg: { $avg: "$credits" } } }]),
+      ])
 
-    const totalCredits = await UserModel.aggregate([
-      { $group: { _id: null, sum: { $sum: "$credits" } } },
-    ])
+      const totalCredits = await UserModel.aggregate([
+        { $group: { _id: null, sum: { $sum: "$credits" } } },
+      ])
 
-    return res.json({
-      totalUsers,
-      activeUsers,
-      todayUsers,
-      premiumUsers,
-      freeUsers,
-      bannedUsers,
-      generatedNotes,
-      generatedMockTests: mockTests,
-      submittedMockTests: submittedMocks,
-      aiRequests: generatedNotes + mockTests,
-      estimatedRevenueNote:
-        "Full revenue ledger lives in Stripe Dashboard — no local payment collection yet.",
-      avgCredits: Math.round(avgCredits[0]?.avg || 0),
-      totalCreditsHeld: totalCredits[0]?.sum || 0,
-      storageUsed: "N/A",
-      serverStatus: "ok",
-      apiStatus: "ok",
+      return {
+        totalUsers,
+        activeUsers,
+        todayUsers,
+        premiumUsers,
+        freeUsers,
+        bannedUsers,
+        generatedNotes,
+        generatedMockTests: mockTests,
+        submittedMockTests: submittedMocks,
+        aiRequests: generatedNotes + mockTests,
+        estimatedRevenueNote:
+          "Full revenue ledger lives in Stripe Dashboard — no local payment collection yet.",
+        avgCredits: Math.round(avgCredits[0]?.avg || 0),
+        totalCreditsHeld: totalCredits[0]?.sum || 0,
+        storageUsed: "N/A",
+        serverStatus: "ok",
+        apiStatus: "ok",
+      }
     })
+
+    return res.json(payload)
   } catch (error) {
     console.error("getStats:", error)
     return res.status(500).json({ message: "Failed to load stats" })
@@ -103,66 +113,74 @@ export const getStats = async (req, res) => {
 /** GET /api/admin/analytics */
 export const getAnalytics = async (req, res) => {
   try {
-    const since30 = daysAgo(30)
-    const [users, notes, mocks, submitted] = await Promise.all([
-      UserModel.find({ createdAt: { $gte: since30 } }).select("createdAt").lean(),
-      Notes.find({ createdAt: { $gte: since30 } }).select("createdAt topic").lean(),
-      MockTest.find({ createdAt: { $gte: since30 } }).select("createdAt").lean(),
-      MockTest.find({ status: "submitted", submittedAt: { $gte: since30 } })
-        .select("score topic timeTakenSec submittedAt")
-        .lean(),
-    ])
+    const payload = await cacheAside(
+      CACHE_KEYS.ADMIN_ANALYTICS,
+      CACHE_TTL.ADMIN_ANALYTICS,
+      async () => {
+        const since30 = daysAgo(30)
+        const [users, notes, mocks, submitted] = await Promise.all([
+          UserModel.find({ createdAt: { $gte: since30 } }).select("createdAt").lean(),
+          Notes.find({ createdAt: { $gte: since30 } }).select("createdAt topic").lean(),
+          MockTest.find({ createdAt: { $gte: since30 } }).select("createdAt").lean(),
+          MockTest.find({ status: "submitted", submittedAt: { $gte: since30 } })
+            .select("score topic timeTakenSec submittedAt")
+            .lean(),
+        ])
 
-    const topicCounts = {}
-    for (const n of notes) {
-      const t = n.topic || "Unknown"
-      topicCounts[t] = (topicCounts[t] || 0) + 1
-    }
-    const topTopics = Object.entries(topicCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([topic, count]) => ({ topic, count }))
+        const topicCounts = {}
+        for (const n of notes) {
+          const t = n.topic || "Unknown"
+          topicCounts[t] = (topicCounts[t] || 0) + 1
+        }
+        const topTopics = Object.entries(topicCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([topic, count]) => ({ topic, count }))
 
-    const subjectCounts = {}
-    let scoreSum = 0
-    let scoreN = 0
-    let timeSum = 0
-    let timeN = 0
-    for (const m of submitted) {
-      const t = m.topic || "Unknown"
-      subjectCounts[t] = (subjectCounts[t] || 0) + 1
-      if (typeof m.score?.percentage === "number") {
-        scoreSum += m.score.percentage
-        scoreN += 1
+        const subjectCounts = {}
+        let scoreSum = 0
+        let scoreN = 0
+        let timeSum = 0
+        let timeN = 0
+        for (const m of submitted) {
+          const t = m.topic || "Unknown"
+          subjectCounts[t] = (subjectCounts[t] || 0) + 1
+          if (typeof m.score?.percentage === "number") {
+            scoreSum += m.score.percentage
+            scoreN += 1
+          }
+          if (typeof m.timeTakenSec === "number") {
+            timeSum += m.timeTakenSec
+            timeN += 1
+          }
+        }
+        const popularSubjects = Object.entries(subjectCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([topic, count]) => ({ topic, count }))
+
+        return {
+          dailyUsers: bucketByDay(users, "createdAt", 14),
+          weeklyUsers: bucketByDay(users, "createdAt", 7),
+          monthlyUsers: bucketByDay(users, "createdAt", 30),
+          notesOverTime: bucketByDay(notes, "createdAt", 14),
+          mockAttempts: bucketByDay(mocks, "createdAt", 14),
+          topTopics,
+          popularSubjects,
+          averageScore: scoreN ? Math.round(scoreSum / scoreN) : 0,
+          averageCompletionSec: timeN ? Math.round(timeSum / timeN) : 0,
+          successRate: scoreN
+            ? Math.round(
+                (submitted.filter((m) => (m.score?.percentage || 0) >= 50).length / scoreN) *
+                  100
+              )
+            : 0,
+          aiUsage: bucketByDay([...notes, ...mocks], "createdAt", 14),
+        }
       }
-      if (typeof m.timeTakenSec === "number") {
-        timeSum += m.timeTakenSec
-        timeN += 1
-      }
-    }
-    const popularSubjects = Object.entries(subjectCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([topic, count]) => ({ topic, count }))
+    )
 
-    return res.json({
-      dailyUsers: bucketByDay(users, "createdAt", 14),
-      weeklyUsers: bucketByDay(users, "createdAt", 7),
-      monthlyUsers: bucketByDay(users, "createdAt", 30),
-      notesOverTime: bucketByDay(notes, "createdAt", 14),
-      mockAttempts: bucketByDay(mocks, "createdAt", 14),
-      topTopics,
-      popularSubjects,
-      averageScore: scoreN ? Math.round(scoreSum / scoreN) : 0,
-      averageCompletionSec: timeN ? Math.round(timeSum / timeN) : 0,
-      successRate: scoreN
-        ? Math.round(
-            (submitted.filter((m) => (m.score?.percentage || 0) >= 50).length / scoreN) *
-              100
-          )
-        : 0,
-      aiUsage: bucketByDay([...notes, ...mocks], "createdAt", 14),
-    })
+    return res.json(payload)
   } catch (error) {
     console.error("getAnalytics:", error)
     return res.status(500).json({ message: "Failed to load analytics" })
@@ -447,27 +465,30 @@ export const listMockTests = async (req, res) => {
 /** GET /api/admin/payments */
 export const getPaymentsOverview = async (req, res) => {
   try {
-    const [usersWithCredits, lowCredits, totalHeld] = await Promise.all([
-      UserModel.countDocuments({ credits: { $gt: 0 } }),
-      UserModel.countDocuments({ credits: { $lt: 10 } }),
-      UserModel.aggregate([{ $group: { _id: null, sum: { $sum: "$credits" } } }]),
-    ])
+    const payload = await cacheAside(CACHE_KEYS.ADMIN_PAYMENTS, CACHE_TTL.ADMIN_STATIC, async () => {
+      const [usersWithCredits, lowCredits, totalHeld] = await Promise.all([
+        UserModel.countDocuments({ credits: { $gt: 0 } }),
+        UserModel.countDocuments({ credits: { $lt: 10 } }),
+        UserModel.aggregate([{ $group: { _id: null, sum: { $sum: "$credits" } } }]),
+      ])
 
-    return res.json({
-      usersWithCredits,
-      lowCreditUsers: lowCredits,
-      totalCreditsInCirculation: totalHeld[0]?.sum || 0,
-      noteGenerationCost: 10,
-      mockTestCost: 0,
-      stripePlans: [
-        { amountInr: 100, credits: 50 },
-        { amountInr: 200, credits: 120 },
-        { amountInr: 500, credits: 300 },
-      ],
-      message:
-        "Transaction history is not stored locally. Use Stripe Dashboard for payments and refunds.",
-      refundsSupported: false,
+      return {
+        usersWithCredits,
+        lowCreditUsers: lowCredits,
+        totalCreditsInCirculation: totalHeld[0]?.sum || 0,
+        noteGenerationCost: 10,
+        mockTestCost: 0,
+        stripePlans: [
+          { amountInr: 100, credits: 50 },
+          { amountInr: 200, credits: 120 },
+          { amountInr: 500, credits: 300 },
+        ],
+        message:
+          "Transaction history is not stored locally. Use Stripe Dashboard for payments and refunds.",
+        refundsSupported: false,
+      }
     })
+    return res.json(payload)
   } catch (error) {
     console.error("getPaymentsOverview:", error)
     return res.status(500).json({ message: "Failed to load payments overview" })
@@ -504,6 +525,7 @@ export const createAnnouncement = async (req, res) => {
       targetId: item._id,
       req,
     })
+    cacheInvalidate(CACHE_KEYS.PUBLIC_ANNOUNCEMENTS)
     return res.status(201).json(item)
   } catch (error) {
     return res.status(500).json({ message: "Failed to create announcement" })
@@ -521,6 +543,7 @@ export const deleteAnnouncement = async (req, res) => {
       targetId: item._id,
       req,
     })
+    cacheInvalidate(CACHE_KEYS.PUBLIC_ANNOUNCEMENTS)
     return res.json({ message: "Deleted" })
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete announcement" })
@@ -607,6 +630,7 @@ export const createNotification = async (req, res) => {
       targetId: item._id,
       req,
     })
+    cacheInvalidate(CACHE_KEYS.PUBLIC_NOTIFICATIONS)
     return res.status(201).json(item)
   } catch (error) {
     return res.status(500).json({ message: "Failed to create notification" })
@@ -636,6 +660,7 @@ export const updateNotification = async (req, res) => {
       targetId: item._id,
       req,
     })
+    cacheInvalidate(CACHE_KEYS.PUBLIC_NOTIFICATIONS)
     return res.json(item)
   } catch (error) {
     return res.status(500).json({ message: "Failed to update notification" })
@@ -653,6 +678,7 @@ export const deleteNotification = async (req, res) => {
       targetId: item._id,
       req,
     })
+    cacheInvalidate(CACHE_KEYS.PUBLIC_NOTIFICATIONS)
     return res.json({ message: "Deleted" })
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete notification" })
@@ -662,53 +688,60 @@ export const deleteNotification = async (req, res) => {
 /** Subscriptions / credit-plan overview */
 export const getSubscriptions = async (req, res) => {
   try {
-    const [totalUsers, freeTier, starterTier, plusTier, proTier, lowCredits, recentUsers] =
-      await Promise.all([
-        UserModel.countDocuments(),
-        UserModel.countDocuments({ credits: { $lte: 50 } }),
-        UserModel.countDocuments({ credits: { $gt: 50, $lte: 100 } }),
-        UserModel.countDocuments({ credits: { $gt: 100, $lte: 200 } }),
-        UserModel.countDocuments({ credits: { $gt: 200 } }),
-        UserModel.countDocuments({ credits: { $lt: 10 } }),
-        UserModel.find()
-          .select("name email credits status createdAt updatedAt")
-          .sort({ credits: -1 })
-          .limit(40)
-          .lean(),
-      ])
+    const payload = await cacheAside(
+      CACHE_KEYS.ADMIN_SUBSCRIPTIONS,
+      CACHE_TTL.ADMIN_STATS,
+      async () => {
+        const [totalUsers, freeTier, starterTier, plusTier, proTier, lowCredits, recentUsers] =
+          await Promise.all([
+            UserModel.countDocuments(),
+            UserModel.countDocuments({ credits: { $lte: 50 } }),
+            UserModel.countDocuments({ credits: { $gt: 50, $lte: 100 } }),
+            UserModel.countDocuments({ credits: { $gt: 100, $lte: 200 } }),
+            UserModel.countDocuments({ credits: { $gt: 200 } }),
+            UserModel.countDocuments({ credits: { $lt: 10 } }),
+            UserModel.find()
+              .select("name email credits status createdAt updatedAt")
+              .sort({ credits: -1 })
+              .limit(40)
+              .lean(),
+          ])
 
-    const notesLast30 = await Notes.countDocuments({
-      createdAt: { $gte: daysAgo(30) },
-    })
+        const notesLast30 = await Notes.countDocuments({
+          createdAt: { $gte: daysAgo(30) },
+        })
 
-    return res.json({
-      plans: CREDIT_PLANS,
-      tiers: {
-        free: freeTier,
-        starter: starterTier,
-        plus: plusTier,
-        pro: proTier,
-      },
-      totalUsers,
-      lowCreditUsers: lowCredits,
-      notesLast30,
-      estimatedNotesCapacity: Math.floor(
-        ((await UserModel.aggregate([{ $group: { _id: null, sum: { $sum: "$credits" } } }]))[0]
-          ?.sum || 0) / 10
-      ),
-      subscribers: recentUsers.map((u) => ({
-        ...u,
-        planHint:
-          u.credits > 200
-            ? "Pro-like"
-            : u.credits > 100
-              ? "Plus-like"
-              : u.credits > 50
-                ? "Starter-like"
-                : "Free",
-      })),
-      note: "Stripe purchases are not stored locally — tiers are inferred from current credit balances.",
-    })
+        return {
+          plans: CREDIT_PLANS,
+          tiers: {
+            free: freeTier,
+            starter: starterTier,
+            plus: plusTier,
+            pro: proTier,
+          },
+          totalUsers,
+          lowCreditUsers: lowCredits,
+          notesLast30,
+          estimatedNotesCapacity: Math.floor(
+            ((await UserModel.aggregate([{ $group: { _id: null, sum: { $sum: "$credits" } } }]))[0]
+              ?.sum || 0) / 10
+          ),
+          subscribers: recentUsers.map((u) => ({
+            ...u,
+            planHint:
+              u.credits > 200
+                ? "Pro-like"
+                : u.credits > 100
+                  ? "Plus-like"
+                  : u.credits > 50
+                    ? "Starter-like"
+                    : "Free",
+          })),
+          note: "Stripe purchases are not stored locally — tiers are inferred from current credit balances.",
+        }
+      }
+    )
+    return res.json(payload)
   } catch (error) {
     console.error("getSubscriptions:", error)
     return res.status(500).json({ message: "Failed to load subscriptions" })
@@ -886,7 +919,7 @@ export const exportReport = async (req, res) => {
 
 /** Settings (non-secret) */
 export const getSettings = async (req, res) => {
-  return res.json({
+  const payload = await cacheAside(CACHE_KEYS.ADMIN_SETTINGS, CACHE_TTL.ADMIN_STATIC, async () => ({
     adminEmail: req.adminEmail,
     sessionHours: Number(process.env.ADMIN_SESSION_HOURS) || 8,
     clientUrl: process.env.CLIENT_URL || "",
@@ -900,5 +933,7 @@ export const getSettings = async (req, res) => {
       storage: "Using MongoDB Atlas / local Mongo",
       backups: "Configure backups on your hosting provider",
     },
-  })
+  }))
+  // Keep adminEmail accurate for the current session
+  return res.json({ ...payload, adminEmail: req.adminEmail })
 }

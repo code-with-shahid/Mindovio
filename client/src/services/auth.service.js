@@ -7,6 +7,7 @@ import {
 } from "firebase/auth"
 import { auth, googleProvider } from "../utils/firebase"
 import api, { clearAuthToken, getStoredToken, storeAuthToken } from "./http"
+import { cacheClear } from "./cache"
 
 export const syncBackendSession = async (firebaseUser) => {
   const { data } = await api.post("/api/auth/session", {
@@ -34,6 +35,7 @@ export const logoutBackend = async () => {
     await api.get("/api/auth/logout")
   } finally {
     clearAuthToken()
+    cacheClear()
   }
 }
 

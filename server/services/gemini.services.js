@@ -1,4 +1,6 @@
 import { normalizeStudyGuide } from "../utils/normalizeStudyGuide.js"
+import { createHash } from "crypto"
+import { dedupeAsync } from "../utils/cache.js"
 
 /**
  * Model chain for production resilience.
@@ -159,6 +161,22 @@ async function callGemini(prompt, { generationConfig, model } = {}) {
     throw err
   }
 
+  const dedupeKey = createHash("sha1")
+    .update(
+      JSON.stringify({
+        prompt,
+        model: modelName,
+        generationConfig: generationConfig || null,
+      })
+    )
+    .digest("hex")
+
+  return dedupeAsync(`gemini:${dedupeKey}`, () =>
+    callGeminiOnce(prompt, { generationConfig, modelName })
+  )
+}
+
+async function callGeminiOnce(prompt, { generationConfig, modelName }) {
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
   }

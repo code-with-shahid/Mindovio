@@ -1,4 +1,3 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
@@ -13,7 +12,7 @@ import Alert from "../components/ui/Alert"
 import EmptyState from "../components/ui/EmptyState"
 import { HistoryListSkeleton, NotesResultSkeleton } from "../components/ui/Skeleton"
 import { useToast } from "../context/ToastContext"
-import { serverUrl } from "../config"
+import { fetchMyNotes, fetchNoteById } from "../services/api"
 
 export default function History() {
   const [topics, setTopics] = useState([])
@@ -31,8 +30,8 @@ export default function History() {
     setListLoading(true)
     setListError("")
     try {
-      const res = await axios.get(serverUrl + "/api/notes/getnotes", { withCredentials: true })
-      setTopics(Array.isArray(res.data) ? res.data : [])
+      const data = await fetchMyNotes()
+      setTopics(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error(error)
       setListError("Couldn’t load your notes. Check your connection and try again.")
@@ -51,8 +50,8 @@ export default function History() {
     setActiveNoteId(noteId)
     setNoteError("")
     try {
-      const res = await axios.get(serverUrl + `/api/notes/${noteId}`, { withCredentials: true })
-      setSelectedNote(res.data.content)
+      const data = await fetchNoteById(noteId)
+      setSelectedNote(data.content)
     } catch (error) {
       console.error(error)
       setSelectedNote(null)
